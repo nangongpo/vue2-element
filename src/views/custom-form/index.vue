@@ -15,9 +15,10 @@
       label-as-placeholder
       border
       @on-change="handleModelChange"
-    />
-    <el-button @click="onSubmit('read')">提交</el-button>
-    <el-button @click="onReset('read')">重置</el-button>
+    >
+      <el-button @click="onSubmit('read')">提交</el-button>
+      <el-button @click="onReset('read')">重置</el-button>
+    </custom-form>
   </div>
 </template>
 
@@ -105,11 +106,11 @@ export default {
           </span>
         },
         prop: 'hobby',
-        defaultValue: '打游戏',
+        defaultValue: '',
         valueWidth: '500px',
         isBlock: true,
         render: (h, context) => {
-          return <el-input {...context.data} type='textarea' rows={2} placeholder=''/>
+          return <el-input {...context.data} type='textarea' rows={2} />
         }
       }
     ]

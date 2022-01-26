@@ -56,6 +56,7 @@ export default {
         ...restData
       }
     }
+
     const vNodes = typeof (item.render) === 'function' ? [item.render(h, eleContext, parentContext.parent)] : []
 
     return vNodes

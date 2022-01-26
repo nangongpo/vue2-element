@@ -1,7 +1,6 @@
 <script>
 /* eslint-disable no-unused-vars */
 export default {
-  name: 'ElSelectOption',
   functional: true,
   props: {
     options: {

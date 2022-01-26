@@ -97,6 +97,18 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/my-form',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/my-form/index'),
+        name: 'MyForm',
+        meta: { title: '我的表单', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [
