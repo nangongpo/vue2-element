@@ -28,9 +28,11 @@ export const isValidValue = (value) => {
 }
 
 export const getFormItemWidth = (width, item, model) => {
-  const { render, prop, prop_width } = item
+  const { render, prop, prop_width, disabled } = item
   if (render === 'image') {
-    const imageNum = model[prop] ? model[prop].length : 1
+    const value = model[prop]
+    let imageNum = Array.isArray(value) ? value.length : value && value.indexOf(',') > -1 ? value.split(',').length : 1
+    imageNum = disabled ? imageNum : imageNum + 1
     const imageWidth = 148
     return (imageNum * imageWidth) + (imageNum - 1) * 10
   }
@@ -125,7 +127,7 @@ export default {
           prop={prop}
           label={label}
           key={index}
-          class={`el-form-item--${prop_width}`}
+          class={{ [`el-form-item--${prop_width}`]: prop_width !== undefined }}
           style={formItemStyle}>
           {
             !hasRender

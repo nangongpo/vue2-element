@@ -129,7 +129,7 @@
 		"label": "上传图片",
 		"prop": "images",
 		"prop_type": "string",
-    "prop_width": 1,
+    "prop_width": 0,
     "order": 10,
     "display": true,
 		"required": false,
@@ -137,6 +137,21 @@
 		"clearable": false,
 		"render": "image",
     "placeholder": "只能上传jpg/jpeg文件，且不超过500kb",
+    "null_value_display": true,
+    "options": null
+	},
+  {
+		"label": "上传文件",
+		"prop": "files",
+		"prop_type": "string",
+    "prop_width": 0,
+    "order": 11,
+    "display": true,
+		"required": false,
+    "editable": true,
+		"clearable": false,
+		"render": "file",
+    "placeholder": "只能上传excel文件，且不超过500kb",
     "null_value_display": true,
     "options": null
 	}

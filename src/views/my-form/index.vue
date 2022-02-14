@@ -1,13 +1,30 @@
 <template>
-  <my-form ref="read" :fields="fields" :model="model" :rules="rules" label-as-placeholder inline>
+  <my-form
+    ref="read"
+    :fields="fields"
+    :model="model"
+    :rules="rules"
+    label-as-placeholder
+    inline
+  >
     <template #input="{ prop, attrs }">
-      <el-input v-model="model[prop]" v-bind="attrs" />
+      <el-input
+        v-model="model[prop]"
+        v-bind="attrs"
+      />
     </template>
     <template #select="{ prop, attrs }">
-      <el-select-option v-model="model[prop]" v-bind="attrs" :options="allOptions[prop]" />
+      <el-select-option
+        v-model="model[prop]"
+        :options="allOptions[prop]"
+        v-bind="attrs"
+      />
     </template>
     <template #cascader="{ prop, attrs }">
-      <el-cascader v-model="model[prop]" v-bind="attrs" />
+      <el-cascader
+        v-model="model[prop]"
+        v-bind="attrs"
+      />
     </template>
     <template #datetimerange="{ prop }">
       <el-date-picker
@@ -20,8 +37,23 @@
       />
     </template>
     <template #image="{ prop, attrs, config }">
-      <el-upload-image v-model="model[prop]" v-bind="attrs" :config="config" :on-preview="onPreview" :http-request="httpRequest" />
+      <el-upload-image
+        v-model="model[prop]"
+        v-bind="attrs"
+        :config="config"
+        :on-preview="onPreview"
+        :http-request="httpRequest"
+      />
       <el-image ref="preview" v-bind="previewInfo" style="display: none" />
+    </template>
+    <template #file="{ prop, attrs, config }">
+      <el-upload-file
+        v-model="model[prop]"
+        v-bind="attrs"
+        :config="config"
+        :on-preview="onPreview"
+      />
+      <!-- 文件预览 -->
     </template>
     <template #default>
       <el-button type="primary" @click="onSubmit('read')">提交</el-button>
@@ -83,10 +115,10 @@ export default {
       }
     },
     httpRequest(file, config) {
-      console.log(file, config)
+      // console.log(file, config)
       return new Promise((resolve, reject) => {
         const randomNum = Math.floor((Math.random() * 4))
-        console.log(randomNum)
+        // console.log(randomNum)
         const result = ['https://fuss10.elemecdn.com/8/27/f01c15bb73e1ef3793e64e6b7bbccjpeg.jpeg' + `?t=${new Date().getTime()}`, 'https://fuss10.elemecdn.com/1/8e/aeffeb4de74e2fde4bd74fc7b4486jpeg.jpeg' + `?t=${new Date().getTime()}`, ''][randomNum]
         result ? resolve(result) : reject(new Error('请求失败'))
       })

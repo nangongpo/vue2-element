@@ -1,5 +1,8 @@
 # vue2-element
 
+## 创建静态资源分支
+git subtree push --prefix=dist origin gh-pages
+
 ## Project setup
 ```
 yarn install

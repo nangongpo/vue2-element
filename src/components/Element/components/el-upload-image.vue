@@ -6,12 +6,14 @@ export default {
   props: {
     value: String,
     httpRequest: Function, // return promise
-    getImage: Function,
+    getImage: Function, // 构造图片链接
     disabled: Boolean,
+    drag: Boolean,
     action: {
       type: String,
       default: '#'
     },
+    limit: Number,
     onRemove: Function,
     onPreview: Function,
     config: Object
@@ -32,17 +34,12 @@ export default {
     }
   },
   methods: {
-    getImages(value) {
-      const { getImage } = this
-      return value ? value.split(',').map(v => {
-        return { value: v, src: getImage ? getImage(v) : v, error: '' }
-      }) : []
-    },
-    onUpload(file) {
-      const { images, getImages, setValue, config, httpRequest } = this
+    handleUpload(file) {
+      const { limit, images, getImages, setValue, config, httpRequest } = this
       const cacheImages = images
-
       if (!httpRequest) return
+      // 限制个数
+      if (images.length >= limit) return
       // 更新视图数据
       const setViewData = (result, error = '图片上传失败') => {
         const image = getImages(result)[0] || { src: null, value: null, error }
@@ -91,53 +88,75 @@ export default {
 
       this[action] && this[action](currentSrc, config)
     },
+    createImage(image) {
+      const { disabled, handleImageEvent } = this
+      const { src, error } = image
+      if (error) {
+        return <span class='el-upload-list__item-thumbnail image-error'>
+          <span class='image-error-text'>
+            { image.error }
+            {
+              !disabled && <el-link type='primary' onClick={() => handleImageEvent('onReUpload', image)}>重新上传</el-link>
+            }
+          </span>
+        </span>
+      }
+      return src && <img
+        src={src}
+        class='el-upload-list__item-thumbnail'
+        onerror={(e) => handleImageEvent('onError', image, e)}/>
+    },
+    createImageAction(image) {
+      const { disabled, handleImageEvent } = this
+      const { src } = image
+      return src && <span class='el-upload-list__item-actions'>
+        <span class='el-upload-list__item-preview' onClick={() => handleImageEvent('onPreview', image)}>
+          <i class='el-icon-zoom-in'></i>
+        </span>
+        {
+          !disabled && <span class='el-upload-list__item-delete' onClick={() => handleImageEvent('onRemove', image)}>
+            <i class='el-icon-delete'></i>
+          </span>
+        }
+      </span>
+    },
+    getImages(value) {
+      const { getImage } = this
+      return value ? value.split(',').map(v => {
+        return { value: v, src: getImage ? getImage(v) : v, error: '' }
+      }) : []
+    },
     setValue(newImages) {
       const newValue = newImages.reduce((t, v) => v.value ? [...t, v.value] : t, []).join(',')
-      console.log(newValue)
       this.$emit('input', newValue)
     }
   },
-  render(h, context) {
-    const { images, disabled, action, handleImageEvent, onUpload } = this
-    console.log(images)
+  render(h) {
+    const { images, disabled, action, drag, limit, createImage, createImageAction, handleUpload } = this
 
     return <div class='el-upload-image'>
       <div vShow={disabled && !images.length}>-</div>
       <div class='el-upload-list--picture-card'>
         {
           images.map((image, index) => {
-            return image && <div key={index} class='el-upload-list__item'>
-              {
-                image.src
-                  ? <img vShow={!image.error} src={image.src} class='el-upload-list__item-thumbnail' onerror={(e) => handleImageEvent('onError', image, e)}/>
-                  : <span class='el-upload-list__item-thumbnail image-error'>
-                    <span class='image-error-text'>
-                      { image.error }
-                      { !disabled && <el-link type='primary' onClick={() => handleImageEvent('onReUpload', image)}>重新上传</el-link> }
-                    </span>
-                  </span>
-              }
-              <span vShow={!!image.src} class={{ 'el-upload-list__item-actions': true }}>
-                <span class='el-upload-list__item-preview' onClick={() => handleImageEvent('onPreview', image)}>
-                  <i class='el-icon-zoom-in'></i>
-                </span>
-                {
-                  !disabled && <span class='el-upload-list__item-delete' onClick={() => handleImageEvent('onRemove', image)}>
-                    <i class='el-icon-delete'></i>
-                  </span>
-                }
-              </span>
+            return <div key={index} class='el-upload-list__item'>
+              { createImage(image) }
+              { createImageAction(image) }
             </div>
           })
         }
         {
           !disabled && <el-upload
             ref='upload'
-            action={action}
-            accept='.jpg,.jpeg'
-            list-type='picture-card'
-            show-file-list={false}
-            http-request={(file) => onUpload(file)}
+            props={{
+              action,
+              drag,
+              limit,
+              listType: 'picture-card',
+              accept: '.jpg,.jpeg',
+              showFileList: false,
+              httpRequest: handleUpload
+            }}
             class='el-upload-wrapper el-upload-list__item'>
             <i class='el-icon-plus'></i>
           </el-upload>
@@ -166,9 +185,19 @@ export default {
 }
 .el-upload-wrapper {
   border: none;
+  &.el-upload-list__item {
+    margin: 0 0 8px 0;
+  }
   .el-upload  {
     width: inherit;
     height: inherit;
   }
 }
+::v-deep .el-upload-dragger {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: inherit;
+}
+
 </style>
