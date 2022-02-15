@@ -20,7 +20,8 @@ export default {
   },
   data() {
     return {
-      cacheImages: this.getImages(this.value)
+      cacheImages: this.getImages(this.value),
+      showUpload: !this.disabled
     }
   },
   computed: {
@@ -35,7 +36,7 @@ export default {
   },
   methods: {
     handleUpload(file) {
-      const { limit, images, getImages, setValue, config, httpRequest } = this
+      const { limit, images, getImages, setValue, config, httpRequest, setCacheImages } = this
       const cacheImages = images
       if (!httpRequest) return
       // 限制个数
@@ -54,7 +55,7 @@ export default {
         } else {
           cacheImages.push(image)
         }
-        this.cacheImages = cacheImages
+        setCacheImages(cacheImages)
       }
       // 上传图片
       httpRequest(file, config).then(result => {
@@ -64,13 +65,14 @@ export default {
       })
     },
     handleImageEvent(action, image, event) {
-      const { images, onRemove, config, setValue } = this
+      const { images, onRemove, config, setCacheImages, setValue } = this
       const currentSrc = image.src
 
       if (action === 'onError') {
-        this.cacheImages = images.reduce((t, v) => {
-          return v.src === currentSrc ? [...t, { ...v, src: '', value: null, error: '图片地址无效' }] : [...t, v]
+        const cacheImages = images.reduce((t, v) => {
+          return v.src === currentSrc ? [...t, { ...v, src: null, value: null, error: '图片地址无效' }] : [...t, v]
         }, [])
+        setCacheImages(cacheImages)
         return
       }
 
@@ -122,9 +124,15 @@ export default {
     },
     getImages(value) {
       const { getImage } = this
-      return value ? value.split(',').map(v => {
+      const images = value ? value.split(',').map(v => {
         return { value: v, src: getImage ? getImage(v) : v, error: '' }
       }) : []
+      return images
+    },
+    setCacheImages(cacheImages) {
+      const { disabled } = this
+      this.cacheImages = cacheImages
+      this.showUpload = !disabled && cacheImages.length > 0 && cacheImages.every(v => !v.error)
     },
     setValue(newImages) {
       const newValue = newImages.reduce((t, v) => v.value ? [...t, v.value] : t, []).join(',')
@@ -132,21 +140,21 @@ export default {
     }
   },
   render(h) {
-    const { images, disabled, action, drag, limit, createImage, createImageAction, handleUpload } = this
+    const { images, showUpload, action, drag, limit, createImage, createImageAction, handleUpload } = this
 
     return <div class='el-upload-image'>
-      <div vShow={disabled && !images.length}>-</div>
+      <div vShow={!showUpload && !images.length}>-</div>
       <div class='el-upload-list--picture-card'>
         {
-          images.map((image, index) => {
-            return <div key={index} class='el-upload-list__item'>
+          images.map((image, index, arr) => {
+            return <div key={index} class={{ 'el-upload-list__item': true, 'gutter': arr.length === index + 1 && !showUpload }}>
               { createImage(image) }
               { createImageAction(image) }
             </div>
           })
         }
         {
-          !disabled && <el-upload
+          <el-upload
             ref='upload'
             props={{
               action,
@@ -157,7 +165,7 @@ export default {
               showFileList: false,
               httpRequest: handleUpload
             }}
-            class='el-upload-wrapper el-upload-list__item'>
+            class={{ 'el-upload-wrapper': true, 'el-upload-list__item': true, gutter: true, hidden: !showUpload }}>
             <i class='el-icon-plus'></i>
           </el-upload>
         }
@@ -185,12 +193,18 @@ export default {
 }
 .el-upload-wrapper {
   border: none;
-  &.el-upload-list__item {
-    margin: 0 0 8px 0;
+  &.hidden {
+    display: none;
+    margin: 0;
   }
   .el-upload  {
     width: inherit;
     height: inherit;
+  }
+}
+.el-upload-list__item {
+  &.gutter {
+    margin: 0 0 8px 0;
   }
 }
 ::v-deep .el-upload-dragger {

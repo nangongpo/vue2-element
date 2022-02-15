@@ -92,26 +92,34 @@ export function export_table_to_excel(node, options = {}) {
   for (let key in ws) {
     if (isValidKey(key)) {
       const [prop, numStr, value] = [key.slice(0, 1), key.slice(1), ws[key].v]
-      ARows.push(Number(numStr))
+      const index = Number(numStr)
+      ARows.push(index)
       if (!columnInfo[prop]) columnInfo[prop] = []
       value && columnInfo[prop].push(value)
     }
   }
   // 最大行数
   const maxRows = Math.max(...ARows)
+  // 有效列的名称列表
+  const columns = Object.keys(columnInfo).filter(v => !!columnInfo[v].length)
+  // 补充缺失的信息
+  for (let i = 0; i < columns.length; i++) {
+    for (let j = 1; j <= maxRows; j++) {
+      const key = columns[i] + j
+      if (!ws[key]) ws[key] = { t: "s", v: "" }
+    }
+  }
 
   // 设置每列的宽度
   if (autoWidth) {    
     const columnWidth = []
     const indexs = 'ABCDEFGHIJKLMNOPGRSTUVWXYZ'
-    console.log(indexs)
     // 设置worksheet每列的最大宽度
     for (let key in columnInfo) {
       if (!columnInfo[key].length) continue
       const colWidths = columnInfo[key].map(val => val ? val.toString().length : 10)
       columnWidth[indexs.indexOf(key)] = { wch: Math.max(...colWidths) }
     }
-    console.log(columnWidth)
     ws['!cols'] = columnWidth
   }
   
@@ -165,8 +173,8 @@ export function export_json_to_excel({
     data.unshift(multiHeader[i])
   }
 
-  var ws_name = "SheetJS";
-  var wb = new Workbook(),
+  const ws_name = "SheetJS";
+  const wb = new Workbook(),
     ws = sheet_from_array_of_arrays(data);
 
   if (merges.length > 0) {
@@ -195,8 +203,6 @@ export function export_json_to_excel({
     ws['!cols'] = colWidth
   }
 
-  console.log(ws)
-
   // 设置每行的高度
   let _rowHeight = []
 
@@ -215,14 +221,14 @@ export function export_json_to_excel({
   /* add excel style */
   addExcelStyle(wb.Sheets[wb.SheetNames[0]], { data, header, headerStyle, cellStyle, multiHeader })
 
-  var wbout = XLSX.write(wb, {
+  const wbout = XLSX.write(wb, {
     bookType: bookType,
     bookSST: false,
     type: 'binary'
-  });
+  })
   saveAs(new Blob([s2ab(wbout)], {
     type: "application/octet-stream"
-  }), `${filename}.${bookType}`);
+  }), `${filename}.${bookType}`)
 }
 
 // 添加excel样式
