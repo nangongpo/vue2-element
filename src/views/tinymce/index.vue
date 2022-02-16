@@ -11,7 +11,6 @@
 
 <script>
 import Editor from '@tinymce/tinymce-vue'
-import { name } from '@/settings'
 const getFileUrl = (url) => url ? process.env.VUE_APP_BASE_API + url : ''
 const getFileName = (url) => url ? url.split('/').pop().split('.')[0] : ''
 
@@ -101,7 +100,7 @@ export default {
     tinymceSrc() {
       const defaultSrc = '/tinymce/tinymce.min.js'
       return process.env.NODE_ENV === 'production'
-        ? `${name}/static${defaultSrc}`
+        ? `/static${defaultSrc}`
         : defaultSrc
     }
   },
