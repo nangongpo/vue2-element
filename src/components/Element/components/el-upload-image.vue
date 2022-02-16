@@ -103,7 +103,7 @@ export default {
           </span>
         </span>
       }
-      return src && <img
+      return !!src && <img
         src={src}
         class='el-upload-list__item-thumbnail'
         onerror={(e) => handleImageEvent('onError', image, e)}/>
@@ -111,7 +111,7 @@ export default {
     createImageAction(image) {
       const { disabled, handleImageEvent } = this
       const { src } = image
-      return src && <span class='el-upload-list__item-actions'>
+      return !!src && <span class='el-upload-list__item-actions'>
         <span class='el-upload-list__item-preview' onClick={() => handleImageEvent('onPreview', image)}>
           <i class='el-icon-zoom-in'></i>
         </span>

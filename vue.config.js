@@ -2,11 +2,18 @@
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
 
+const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin')
+const CompressionPlugin = require('compression-webpack-plugin')
+const GitRevisionPlugin = require('git-revision-webpack-plugin')
+
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
 const name = defaultSettings.title || 'vue Element Admin' // page title
+const publicPath = '/vue2-element/'
+const outputDir = 'dist'
+const assetsDir = 'static'
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -24,9 +31,9 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/vue2-element/',
-  outputDir: 'dist',
-  assetsDir: 'static',
+  publicPath,
+  outputDir,
+  assetsDir,
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
@@ -38,18 +45,33 @@ module.exports = {
     },
     before: require('./mock/mock-server.js')
   },
-  configureWebpack: {
-    // provide the app's title in webpack's name field, so that
-    // it can be accessed in index.html to inject the correct title.
-    name: name,
-    resolve: {
-      alias: {
-        '@': resolve('src')
-      }
+  configureWebpack: (config) => {
+    const plugins = []
+    if (process.env.NODE_ENV === 'production') {
+      plugins.push(
+        // gzip压缩
+        new CompressionPlugin({
+          test: /\.js$|\.html$|.\css/, // 匹配文件名
+          threshold: 10240, // 对超过4k的数据压缩
+          deleteOriginalAssets: false // 不删除源文件
+        }),
+        // 获取git提交记录
+        new GitRevisionPlugin()
+      )
+    }
+    return {
+      name,
+      plugins
     }
   },
   chainWebpack(config) {
-    // it can improve the speed of the first screen, it is recommended to turn on preload
+    // 测量webpack构建速度
+    config
+      .when(process.env.NODE_ENV !== 'development',
+        config => {
+          config.plugin('speed')
+            .use(SpeedMeasureWebpackPlugin)
+        })
     // it can improve the speed of the first screen, it is recommended to turn on preload
     config.plugin('preload').tap(() => [
       {
@@ -63,6 +85,20 @@ module.exports = {
 
     // when there are many pages, it will cause too many meaningless requests
     config.plugins.delete('prefetch')
+
+    // CopyWebpackPlugin插件
+    config
+      .plugin('copy')
+      .tap(args => {
+        args[0][0].ignore.push('**/*/**')
+        args[0].push({
+          from: resolve('public'),
+          to: resolve(`${outputDir}/${assetsDir}`),
+          toType: 'dir',
+          ignore: ['.jpg', '.jpeg', '.png', '.ico', 'index.html']
+        })
+        return args
+      })
 
     // set svg-sprite-loader
     config.module
@@ -110,7 +146,7 @@ module.exports = {
                 commons: {
                   name: 'chunk-commons',
                   test: resolve('src/components'), // can customize your rules
-                  minChunks: 3, //  minimum common number
+                  minChunks: 2, //  minimum common number
                   priority: 5,
                   reuseExistingChunk: true
                 }

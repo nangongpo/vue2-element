@@ -6,6 +6,7 @@
     :rules="rules"
     label-as-placeholder
     inline
+    class="app-container"
   >
     <template #input="{ prop, attrs }">
       <el-input
@@ -44,7 +45,7 @@
         :on-preview="onPreview"
         :http-request="httpRequest"
       />
-      <el-image ref="preview" v-bind="previewInfo" style="display: none" />
+      <el-image v-if="!!previewInfo.src" ref="preview" v-bind="previewInfo" style="display: none" />
     </template>
     <template #file="{ prop, attrs, config }">
       <el-upload-file

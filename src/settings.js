@@ -1,4 +1,5 @@
 module.exports = {
+  name: 'vue2-element',
   title: 'Vue Element Admin',
 
   /**

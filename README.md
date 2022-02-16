@@ -1,5 +1,9 @@
 # vue2-element
 
+## 任务
+  - [x] 导出带样式的excel
+  - [ ] vuecli4打包优化
+
 ## 创建静态资源分支
 git subtree push --prefix=dist origin gh-pages
 

@@ -84,18 +84,18 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  {
-    path: '/custom-form',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/custom-form/index'),
-        name: 'CustomForm',
-        meta: { title: '自定义表单', icon: 'icon', noCache: true }
-      }
-    ]
-  },
+  // {
+  //   path: '/custom-form',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/custom-form/index'),
+  //       name: 'CustomForm',
+  //       meta: { title: '自定义表单', icon: 'icon', noCache: true }
+  //     }
+  //   ]
+  // },
   {
     path: '/my-form',
     component: Layout,
@@ -109,17 +109,29 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/icon',
+    path: '/tinymce',
     component: Layout,
     children: [
       {
         path: 'index',
-        component: () => import('@/views/icons/index'),
-        name: 'Icons',
-        meta: { title: '图标库', icon: 'icon', noCache: true }
+        component: () => import('@/views/tinymce/index'),
+        name: 'MyForm',
+        meta: { title: '富文本编辑器', icon: 'icon', noCache: true }
       }
     ]
   },
+  // {
+  //   path: '/icon',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'index',
+  //       component: () => import('@/views/icons/index'),
+  //       name: 'Icons',
+  //       meta: { title: '图标库', icon: 'icon', noCache: true }
+  //     }
+  //   ]
+  // },
 
   {
     path: '/excel',
