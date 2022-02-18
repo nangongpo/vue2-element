@@ -21,6 +21,13 @@ service.interceptors.request.use(
       // please modify it according to the actual situation
       config.headers['X-Token'] = getToken()
     }
+    // 请求发出时，保存cancelToken
+    config.cancelToken = new axios.CancelToken(e => {
+      store.dispatch('cancelRequest/addToken', {
+        cancel: e,
+        url: location.host + config.url
+      })
+    })
     return config
   },
   error => {
@@ -73,11 +80,18 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    // 这里判断异常情况，如果axios.isCancel 为 true时，说明请求被取消
+    if (axios.isCancel(error)) {
+      // 请求取消
+      console.warn(error)
+      console.table([error.message.split('---')[0]], 'cancel')
+    } else {
+      Message({
+        message: error.message,
+        type: 'error',
+        duration: 5 * 1000
+      })
+    }
     return Promise.reject(error)
   }
 )

@@ -17,6 +17,9 @@ router.beforeEach(async(to, from, next) => {
   // set page title
   document.title = getPageTitle(to.meta.title)
 
+  // 切换路由时取消正在pending的请求
+  store.dispatch('cancelRequest/clearToken')
+
   // determine whether the user has logged in
   const hasToken = getToken()
 

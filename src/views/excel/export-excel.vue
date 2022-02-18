@@ -68,11 +68,17 @@ export default {
   created() {
     this.fetchData()
   },
+  // activated() {
+  //   console.log('activated', this.list)
+  //   !this.list && this.fetchData()
+  // },
   methods: {
     fetchData() {
       this.listLoading = true
       fetchList().then(response => {
         this.list = response.data.items
+        this.listLoading = false
+      }).catch(() => {
         this.listLoading = false
       })
     },

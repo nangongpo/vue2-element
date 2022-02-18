@@ -65,6 +65,10 @@ export default {
   created() {
     this.fetchData()
   },
+  // activated() {
+  //   console.log('activated', this.list)
+  //   !this.list && this.fetchData()
+  // },
   methods: {
     fetchData() {
       this.listLoading = true
@@ -72,6 +76,8 @@ export default {
         this.list = response.data.items.map(v => {
           return { ...v, title: '我的我的' + v.title + '我的我的' }
         })
+        this.listLoading = false
+      }).catch(() => {
         this.listLoading = false
       })
     },

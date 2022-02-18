@@ -1,5 +1,5 @@
 const IS_PROD = process.env.NODE_ENV === 'production'
-const plugins = []
+const plugins = ['dynamic-import-node']
 
 if (IS_PROD) {
   // 去除日志的插件

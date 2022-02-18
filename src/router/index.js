@@ -84,18 +84,47 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  // {
-  //   path: '/custom-form',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/custom-form/index'),
-  //       name: 'CustomForm',
-  //       meta: { title: '自定义表单', icon: 'icon', noCache: true }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/permission',
+    component: Layout,
+    redirect: '/permission/page',
+    alwaysShow: true, // will always show the root menu
+    name: 'Permission',
+    meta: {
+      title: 'Permission',
+      icon: 'lock',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'page',
+        component: () => import('@/views/permission/page'),
+        name: 'PagePermission',
+        meta: {
+          title: 'Page Permission',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+      {
+        path: 'directive',
+        component: () => import('@/views/permission/directive'),
+        name: 'DirectivePermission',
+        meta: {
+          title: 'Directive Permission'
+          // if do not set roles, means: this page does not require permission
+        }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/permission/role'),
+        name: 'RolePermission',
+        meta: {
+          title: 'Role Permission',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
   {
     path: '/my-form',
     component: Layout,
@@ -104,7 +133,7 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/my-form/index'),
         name: 'MyForm',
-        meta: { title: '我的表单', icon: 'icon', noCache: true }
+        meta: { title: '我的表单', icon: 'icon', noCache: false }
       }
     ]
   },
@@ -116,7 +145,19 @@ export const asyncRoutes = [
         path: 'index',
         component: () => import('@/views/tinymce/index'),
         name: 'MyForm',
-        meta: { title: '富文本编辑器', icon: 'icon', noCache: true }
+        meta: { title: '富文本编辑器', icon: 'icon', noCache: false }
+      }
+    ]
+  },
+  {
+    path: '/confirm-dialog',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/confirm-dialog/index'),
+        name: 'MyForm',
+        meta: { title: 'confirm弹窗', icon: 'icon', noCache: true }
       }
     ]
   },
@@ -147,19 +188,19 @@ export const asyncRoutes = [
         path: 'export-excel',
         component: () => import('@/views/excel/export-excel'),
         name: 'ExportExcel',
-        meta: { title: 'Export Excel' }
+        meta: { title: 'Export Excel', noCache: true }
       },
       {
         path: 'export-selected-excel',
         component: () => import('@/views/excel/select-excel'),
         name: 'SelectExcel',
-        meta: { title: 'Export Selected' }
+        meta: { title: 'Export Selected', noCache: true }
       },
       {
         path: 'export-merge-header',
         component: () => import('@/views/excel/merge-header'),
         name: 'MergeHeader',
-        meta: { title: 'Merge Header' }
+        meta: { title: 'Merge Header', noCache: true }
       },
       {
         path: 'upload-excel',
