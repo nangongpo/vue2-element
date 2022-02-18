@@ -100,7 +100,7 @@ export default {
     tinymceSrc() {
       const defaultSrc = '/tinymce/tinymce.min.js'
       return process.env.NODE_ENV === 'production'
-        ? `/static${defaultSrc}`
+        ? `static${defaultSrc}`
         : defaultSrc
     }
   },
