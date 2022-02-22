@@ -1,42 +1,45 @@
 # vue2-element
 
+项目访问地址：https://nangongpo.github.io/vue2-element/
 ## 任务
   - [x] 导出带样式的excel
   - [x] 切换路由取消正在pending的请求
+  - [x] 富文本编辑器tinymce的使用
   - [ ] vuecli4打包优化
 
-## 创建静态资源分支
-git subtree push --prefix=dist origin gh-pages
+## 创建静态资源分支gh-pages
 
-## Project setup
-```
-yarn install
-```
+- 首次创建
+  ```
+  npm run build:prod(主分支打包)
+  git checkout -b gh-pages
+  git add -f dist
+  git commit '提交内容'
+  git subtree push --prefix=dist origin gh-pages
+  ```
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+- 后续更新
+  ```
+  npm run build:prod(主分支打包)
+  git checkout gh-pages
+  git add -f dist
+  git commit '提交内容'
+  git subtree push --prefix=dist origin gh-pages
+  ```
 
-### Compiles and minifies for production
-```
-yarn build
-```
+## 项目构建
 
-### Run your unit tests
-```
-yarn test:unit
-```
+# build for test environment
+npm run build:stage
 
-### Run your end-to-end tests
-```
-yarn test:e2e
-```
+# build for production environment
+npm run build:prod
 
-### Lints and fixes files
-```
-yarn lint
-```
+# preview the release environment effect
+npm run preview
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+# preview the release environment effect + static resource analysis
+npm run report
+
+# code format check
+npm run lint
