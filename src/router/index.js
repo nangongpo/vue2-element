@@ -161,18 +161,30 @@ export const asyncRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/icon',
-  //   component: Layout,
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/icons/index'),
-  //       name: 'Icons',
-  //       meta: { title: '图标库', icon: 'icon', noCache: true }
-  //     }
-  //   ]
-  // },
+  {
+    path: '/threejs',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/threejs/index'),
+        name: 'ThreeJS',
+        meta: { title: 'threejs', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/icon',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/icons/index'),
+        name: 'Icons',
+        meta: { title: '图标库', icon: 'icon', noCache: true }
+      }
+    ]
+  },
 
   {
     path: '/excel',

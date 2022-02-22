@@ -5,6 +5,7 @@
   - [x] 导出带样式的excel
   - [x] 切换路由取消正在pending的请求
   - [x] 富文本编辑器tinymce的使用
+  - [x] 3D引擎threejs的基本用法
   - [ ] vuecli4打包优化
 
 ## 创建静态资源分支gh-pages
