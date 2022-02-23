@@ -120,6 +120,10 @@ export default {
     creatingText(dom, options = {}) {
       if (!dom) return
       const { width, height, text } = options
+      const fontPath = '/fonts/Roboto_Regular.json'
+      const robotoRegularPath = process.env.NODE_ENV === 'production'
+        ? `static${fontPath}`
+        : fontPath
       const color = '#ffffff'
 
       // 创建场景
@@ -138,7 +142,7 @@ export default {
 
       const loader = new FontLoader()
       // 字体转换地址： https://gero3.github.io/facetype.js/
-      loader.load('/fonts/Roboto_Regular.json', function(font) {
+      loader.load(robotoRegularPath, function(font) {
         const textGeo = new TextGeometry(text, {
           font: font,
           size: 80,
