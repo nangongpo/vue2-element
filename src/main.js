@@ -13,6 +13,13 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
+// 换一个pl-table用
+import plTable from 'pl-table'
+
+import 'pl-table/themes/index.css' // 引入样式（必须引入)，vuecli3.0不需要配置，cli2.0请查看webpack是否配置了url-loader对woff，ttf文件的引用,不配置会报错哦
+import 'pl-table/themes/plTableStyle.css'
+Vue.use(plTable)
+
 import './icons' // icon
 import './permission' // permission control
 import './utils/error-log' // error log

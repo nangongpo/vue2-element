@@ -222,6 +222,42 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/custom-table',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/custom-table/index'),
+        name: 'CustomTable',
+        meta: { title: '自定义多级表头', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/custom-table-input',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/custom-table-input/index'),
+        name: 'CustomTableInput',
+        meta: { title: '自定义多级表头-虚拟滚动版', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+  {
+    path: '/side-pop-up',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/side-pop-up/index'),
+        name: 'SidePopUp',
+        meta: { title: '侧边弹框', icon: 'icon', noCache: true }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
