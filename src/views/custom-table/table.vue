@@ -11,8 +11,12 @@
 </template>
 <script>
 import column from './column.vue'
+import { PlTable } from 'pl-table'
+import 'pl-table/themes/index.css'
+import 'pl-table/themes/plTableStyle.css'
 export default {
   components: {
+    PlTable,
     column
   },
   props: {

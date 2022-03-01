@@ -25,10 +25,15 @@
 
 <script>
 import mytable from './table.vue'
+import { PlxTableColumn, PlxTableGrid } from 'pl-table'
 import { columnData, tableData } from './demo'
+import 'pl-table/themes/index.css'
+import 'pl-table/themes/plTableStyle.css'
 export default {
   name: 'CustomTableInput',
   components: {
+    PlxTableColumn,
+    PlxTableGrid,
     mytable
   },
   data() {
