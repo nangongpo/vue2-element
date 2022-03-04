@@ -3554,7 +3554,7 @@ core-js-compat@^3.18.0, core-js-compat@^3.19.0, core-js-compat@^3.6.5:
     browserslist "^4.17.6"
     semver "7.0.0"
 
-core-js@^2.4.0:
+core-js@^2.4.0, core-js@^2.6.5:
   version "2.6.12"
   resolved "https://registry.npmmirror.com/core-js/download/core-js-2.6.12.tgz#d9333dfa7b065e347cc5682219d6f690859cc2ec"
   integrity sha1-2TM9+nsGXjR8xWgiGdb2kIWcwuw=
@@ -8742,6 +8742,25 @@ pkg-dir@^4.1.0:
   dependencies:
     find-up "^4.0.0"
 
+pl-table@^2.7.5:
+  version "2.7.5"
+  resolved "https://registry.yarnpkg.com/pl-table/-/pl-table-2.7.5.tgz#fd01d3e564fe5450ab23f0c96c0718fe670b0543"
+  integrity sha512-uzFetO3nEF8C40cADJpAJPu297X/6kuOqrP8XIPsWRay4mBgNt3FSokg6s/3wpnrLdXwkz6i9FscjkEaM0A7Pw==
+  dependencies:
+    async-validator "~1.8.1"
+    deepmerge "^1.2.0"
+    normalize-wheel "^1.0.1"
+    plxy-grid "^2.8.3"
+    resize-observer-polyfill "^1.5.0"
+    throttle-debounce "^1.0.1"
+    vuedraggable "^2.23.2"
+    xe-utils "^2.3.0"
+
+plxy-grid@^2.8.3:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/plxy-grid/-/plxy-grid-2.8.3.tgz#a3c0c9ce920fcfa95aa55ba027c81422963174be"
+  integrity sha512-udl+J0sCjTyLJScMVnAfSTvyqyd9VbNlZ76ywMTqaKZKLnGykuOaUr77YLKH6OMgfBoX30MftjRticvjNca98g==
+
 pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.nlark.com/pn/download/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
@@ -10124,6 +10143,14 @@ sigmund@^1.0.1:
   resolved "https://registry.npm.taobao.org/sigmund/download/sigmund-1.0.1.tgz#3ff21f198cad2175f9f3b781853fd94d0d19b590"
   integrity sha1-P/IfGYytIXX587eBhT/ZTQ0ZtZA=
 
+sign-canvas@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/sign-canvas/-/sign-canvas-1.1.4.tgz#1261e3a32fb48957622791995701f03674c2f233"
+  integrity sha512-vdA++ba87/0QtY1xme5H3HmipwF9cJyuu+H3b6TpYd0gEJSlaCr/5aLvvKaDY4TyojL2z4JLPhZGRC7cyYymnA==
+  dependencies:
+    core-js "^2.6.5"
+    vue "^2.6.10"
+
 signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.5"
   resolved "https://registry.npmmirror.com/signal-exit/download/signal-exit-3.0.5.tgz#9e3e8cc0c75a99472b44321033a7702e7738252f"
@@ -10244,6 +10271,11 @@ sort-keys@^1.0.0:
   integrity sha1-RBttTTRnmPG05J6JIK37oOVD+a0=
   dependencies:
     is-plain-obj "^1.0.0"
+
+sortablejs@1.10.2:
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.10.2.tgz#6e40364d913f98b85a14f6678f92b5c1221f5290"
+  integrity sha512-YkPGufevysvfwn5rfdlGyrGjt7/CRHwvRPogD/lC+TnvcN29jDpCifKP+rBqf+LRldfXSTh+0CGLcSg0VIxq3A==
 
 source-list-map@^2.0.0:
   version "2.0.1"
@@ -11438,10 +11470,17 @@ vue-template-es2015-compiler@^1.6.0, vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.nlark.com/vue-template-es2015-compiler/download/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha1-HuO8mhbsv1EYvjNLsV+cRvgvWCU=
 
-vue@^2.6.14:
+vue@^2.6.10, vue@^2.6.14:
   version "2.6.14"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.14.tgz#e51aa5250250d569a3fbad3a8a5a687d6036e235"
   integrity sha512-x2284lgYvjOMj3Za7kqzRcUSxBboHqtgRE2zlos1qWaOye5yUmHn42LB1250NJBLRwEcdrB0JRwyPTEPhfQjiQ==
+
+vuedraggable@^2.23.2:
+  version "2.24.3"
+  resolved "https://registry.yarnpkg.com/vuedraggable/-/vuedraggable-2.24.3.tgz#43c93849b746a24ce503e123d5b259c701ba0d19"
+  integrity sha512-6/HDXi92GzB+Hcs9fC6PAAozK1RLt1ewPTLjK0anTYguXLAeySDmcnqE8IC0xa7shvSzRjQXq3/+dsZ7ETGF3g==
+  dependencies:
+    sortablejs "1.10.2"
 
 vuex@^3.4.0:
   version "3.6.2"
@@ -11796,6 +11835,11 @@ ws@^7.0.0:
   version "7.5.5"
   resolved "https://registry.npmmirror.com/ws/download/ws-7.5.5.tgz#8b4bc4af518cfabd0473ae4f99144287b33eb881"
   integrity sha1-i0vEr1GM+r0Ec65PmRRCh7M+uIE=
+
+xe-utils@^2.3.0:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/xe-utils/-/xe-utils-2.8.3.tgz#b5cc9e871d1115a7ac3f2a9292c1dea5efe0f2d0"
+  integrity sha512-qjiq6juv+ZPDJC3oXr9E4wjaN73G/yeqUfozpmZOmBBTw2oH5A60Jz3AvCVLKFoTQl7qfsjefR9i2gyyMz7TQw==
 
 xlsx-color@^0.14.30:
   version "0.14.30"

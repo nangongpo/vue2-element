@@ -258,6 +258,18 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/sign',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/sign/index'),
+        name: 'sign',
+        meta: { title: '签名', icon: 'icon', noCache: true }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
