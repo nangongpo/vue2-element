@@ -6978,6 +6978,11 @@ js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
+jsbarcode2@^3.9.3:
+  version "3.9.3"
+  resolved "https://registry.npmmirror.com/jsbarcode2/-/jsbarcode2-3.9.3.tgz#6fba942cc5824dfa783b6cd5a2b3e99121514d4d"
+  integrity sha512-+hHn7MNymccEbNdA1Aj1BOboIQsbX6py+vRzvnhE4Gd/gvZ5KKV32l4h1k3Cu2x6mDvnZ5X8/23CBMD4Di+Eew==
+
 jsbn@~0.1.0:
   version "0.1.1"
   resolved "https://registry.nlark.com/jsbn/download/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"

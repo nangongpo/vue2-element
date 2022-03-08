@@ -174,6 +174,18 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/barcode',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/barcode/index'),
+        name: 'Barcode',
+        meta: { title: '条形码', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [
@@ -185,7 +197,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
   {
     path: '/excel',
     component: Layout,
