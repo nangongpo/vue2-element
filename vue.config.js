@@ -11,7 +11,7 @@ function resolve(dir) {
 }
 
 const name = settings.title // page title
-const publicPath = '/'
+const publicPath = `/${settings.name}/`
 const outputDir = 'dist'
 const assetsDir = 'static'
 
