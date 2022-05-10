@@ -5,7 +5,7 @@
   - [x] 切换路由取消正在pending的请求
   - [x] 富文本编辑器tinymce的使用
   - [x] 3D引擎threejs的基本用法
-  - [] vuecli4打包优化
+  - [ ] vuecli4打包优化
     - [x] 按需加载element-ui, 然后将其独立打包 （babel-plugin-component 和 splitChunks）
           [基本组件列表](src/vendor/Element.js)，剩余组件可通过 import { xx } from 'element-ui'  components: { 'el-xx': xx } 进行局部注册使用
     - [ ] 较大的第三方包， 如 xlsx、pdf-dist、tinymce, 可使用js动态加载的方法
