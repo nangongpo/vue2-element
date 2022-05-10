@@ -8,6 +8,9 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 // import Stats from 'three/examples/jsm/libs/stats.module'
 import WebGL from 'three/examples/jsm/capabilities/WebGL'
+import { getLocalFile } from '@/api/file'
+
+const robotoRegularFont = getLocalFile('/fonts/Roboto_Regular.json')
 
 // 兼容性检查
 const checkWebGL = (dom, cb) => {
@@ -120,10 +123,6 @@ export default {
     creatingText(dom, options = {}) {
       if (!dom) return
       const { width, height, text } = options
-      const fontPath = '/fonts/Roboto_Regular.json'
-      const robotoRegularPath = process.env.NODE_ENV === 'production'
-        ? `static${fontPath}`
-        : fontPath
       const color = '#ffffff'
 
       // 创建场景
@@ -142,7 +141,7 @@ export default {
 
       const loader = new FontLoader()
       // 字体转换地址： https://gero3.github.io/facetype.js/
-      loader.load(robotoRegularPath, function(font) {
+      loader.load(robotoRegularFont, function(font) {
         const textGeo = new TextGeometry(text, {
           font: font,
           size: 80,

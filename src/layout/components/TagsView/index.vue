@@ -19,10 +19,10 @@
       </router-link>
     </scroll-pane>
     <ul v-show="visible" :style="{left:left+'px',top:top+'px'}" class="contextmenu">
-      <li @click="refreshSelectedTag(selectedTag)">Refresh</li>
-      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)">Close</li>
-      <li @click="closeOthersTags">Close Others</li>
-      <li @click="closeAllTags(selectedTag)">Close All</li>
+      <li @click="refreshSelectedTag(selectedTag)">刷新选中的标签页</li>
+      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)">关闭选中的标签页</li>
+      <li @click="closeOthersTags">关闭其他标签页</li>
+      <li @click="closeAllTags(selectedTag)">关闭所有标签页</li>
     </ul>
   </div>
 </template>
@@ -200,6 +200,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '~@/styles/base/_variables.scss';
+
 .tags-view-container {
   height: 34px;
   width: 100%;
@@ -227,9 +229,9 @@ export default {
         margin-right: 15px;
       }
       &.active {
-        background-color: #42b983;
+        background-color: $blue;
         color: #fff;
-        border-color: #42b983;
+        border-color: $blue;
         &::before {
           content: '';
           background: #fff;

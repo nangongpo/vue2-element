@@ -1,18 +1,20 @@
 module.exports = {
   root: true,
-  parserOptions: {
-    parser: 'babel-eslint',
-    sourceType: 'module'
-  },
   env: {
-    browser: true,
-    node: true,
-    es6: true,
+    node: true
   },
-  extends: ['plugin:vue/recommended', 'eslint:recommended'],
-
+  'extends': [
+    'plugin:vue/essential',
+    'eslint:recommended'
+  ],
+  parserOptions: {
+    parser: 'babel-eslint'
+  },
   // add your custom rules here
   //it is base on https://github.com/vuejs/eslint-config-vue
+  // "off" -> 0 关闭规则
+  // "warn" -> 1 开启警告规则
+  //"error" -> 2 开启错误规则
   rules: {
     "vue/max-attributes-per-line": [2, {
       "singleline": 10,
@@ -26,6 +28,7 @@ module.exports = {
     "vue/name-property-casing": ["error", "PascalCase"],
     "vue/no-v-html": "off",
     "vue/require-default-prop": 0,
+    'no-case-declarations': 0,
     'accessor-pairs': 2,
     'arrow-spacing': [2, {
       'before': true,
@@ -195,5 +198,16 @@ module.exports = {
       objectsInObjects: false
     }],
     'array-bracket-spacing': [2, 'never']
-  }
+  },
+  overrides: [
+    {
+      files: [
+        '**/__tests__/*.{j,t}s?(x)',
+        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+      ],
+      env: {
+        jest: true
+      }
+    }
+  ]
 }

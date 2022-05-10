@@ -1,0 +1,133 @@
+// float
+.fr {
+  float: right;
+}
+
+.fl {
+  float: left;
+}
+
+// 间距
+.pr-5 {
+  padding-right: 5px;
+}
+
+.pl-5 {
+  padding-left: 5px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+// 水平间距
+.px-10 {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+// 垂直间距
+.py-10 {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.block {
+  display: block;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+// 光标小手
+.pointer {
+  cursor: pointer;
+}
+
+// 文字大小
+.font-14 {
+  font-size: $font-14;
+}
+
+.font-16 {
+  font-size: $font-16;
+}
+
+.font-18 {
+  font-size: $font-18;
+}
+
+.font-20 {
+  font-size: $font-20;
+}
+
+// 布局
+// 水平垂直居中
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 文本布局样式
+.text-justify {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+// 文本颜色
+.text-primary {
+  color: $blue;
+}
+
+.text-success {
+  color: $green;
+}
+
+.text-warning {
+  color: $yellow;
+}
+
+.text-info {
+  color: #999999;
+}
+
+.text-danger {
+  color: $red;
+  &.el-button--text {
+    &:hover, &:focus {
+      color: $red;
+    }
+  }
+}
+
+.text-overflow {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  white-space: nowrap;
+}

@@ -21,27 +21,21 @@
   }
 }
 
-.small-padding {
-  .cell {
-    padding-left: 5px;
-    padding-right: 5px;
+.el-message-box {
+  min-width: 320px;
+  width: auto;
+  margin-top: -10%;
+  .el-message-box__close {
+    color: $font-color;
+    font-size: 20px;
+    font-weight: 700;
   }
 }
 
-.fixed-width {
-  .el-button--mini {
-    padding: 7px 10px;
-    min-width: 60px;
-  }
-}
-
-.status-col {
-  .cell {
-    padding: 0 10px;
-    text-align: center;
-
-    .el-tag {
-      margin-right: 0px;
+.el-dialog__wrapper {
+  &.center {
+    .el-dialog {
+      margin-top: -15vh !important;
     }
   }
 }
@@ -52,6 +46,33 @@
   left: 0;
   position: relative;
   margin: 0 auto;
+  border-radius: 8px;
+  // 水平垂直居中
+  &.scroll {
+    .el-dialog__body {
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+  }
+  &.hidden {
+    display: none;
+  }
+  .el-dialog__close {
+    color: $font-color;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .el-dialog__body {
+    padding: 0 20px;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    color: $font-color;
+    & > .el-form {
+      padding-top: 18px;
+      margin-right: -80px;
+      box-sizing: border-box;
+    }
+  }
 }
 
 // refine element ui upload
@@ -81,4 +102,35 @@
 // to fix el-date-picker css style
 .el-range-separator {
   box-sizing: content-box;
+}
+
+.el-message--success {
+  background-color: $--color-success;
+  border-color:$--color-success;
+}
+.el-message--warning {
+  background-color: $--color-warning;
+  border-color:$--color-warning;
+}
+.el-message--error {
+  background-color: $--color-danger;
+  border-color:$--color-danger;
+}
+.el-select-dropdown {
+  z-index: 999999999999 !important;
+}
+
+.el-badge {
+  &.icon-badge {
+    font-size: 20px;
+    .el-badge__content {
+      &.is-fixed {
+        top: 12px;
+      }
+      &.is-dot {
+        width: 12px;
+        height: 12px;
+      }
+    }
+  }
 }

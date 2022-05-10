@@ -65,10 +65,11 @@ function s2ab(s) {
 }
 
 /**
+ * 导出表格元素
  * @param {*} node $refs获取的节点 或 dom元素
  * @param {*} options 
  */
-export function export_table_to_excel(node, options = {}) {
+ export function export_table_to_excel(node, options = {}) {
   const {
     headerStyle, // 表头样式
     cellStyle, // 单元格样式
@@ -113,12 +114,24 @@ export function export_table_to_excel(node, options = {}) {
   // 设置每列的宽度
   if (autoWidth) {    
     const columnWidth = []
-    const indexs = 'ABCDEFGHIJKLMNOPGRSTUVWXYZ'
     // 设置worksheet每列的最大宽度
+    let i = 0
     for (let key in columnInfo) {
       if (!columnInfo[key].length) continue
-      const colWidths = columnInfo[key].map(val => val ? val.toString().length : 10)
-      columnWidth[indexs.indexOf(key)] = { wch: Math.max(...colWidths) }
+      const colWidths = columnInfo[key].map(val => {
+        /*先判断是否为null/undefined*/
+        if (val == null) {
+          return 10
+        }
+        /*再判断是否为中文*/
+        else if (val.toString().charCodeAt(0) > 255) {
+          return val.toString().length * 2
+        } else {
+          return val.toString().length + 2
+        }
+      })
+      columnWidth[i] = { wch: Math.max(...colWidths) }
+      i++
     }
     ws['!cols'] = columnWidth
   }
@@ -152,6 +165,7 @@ export function export_table_to_excel(node, options = {}) {
   }), `${filename}.${bookType}`)
 }
 
+// 导出表格数据
 export function export_json_to_excel({
   multiHeader = [],
   header,
@@ -186,21 +200,34 @@ export function export_json_to_excel({
 
   if (autoWidth) {
     /*设置worksheet每列的最大宽度*/
-    const colWidths = data.map(row => row.map(val => {
-      return {
-        'wch': val ? val.toString().length : 10
+    const colWidth = data.map(row => row.map(val => {
+      /*先判断是否为null/undefined*/
+      if (val == null) {
+        return {
+          'wch': 10
+        }
+      }
+      /*再判断是否为中文*/
+      else if (val.toString().charCodeAt(0) > 255) {
+        return {
+          'wch': val.toString().length * 2
+        }
+      } else {
+        return {
+          'wch': val.toString().length + 2
+        }
       }
     }))
     /*以第一行为初始值*/
-    let colWidth = colWidths[0];
-    for (let i = 1; i < colWidths.length; i++) {
-      for (let j = 0; j < colWidths[i].length; j++) {
-        if (colWidth[j]['wch'] < colWidths[i][j]['wch']) {
-          colWidth[j]['wch'] = colWidths[i][j]['wch'];
+    let result = colWidth[0];
+    for (let i = 1; i < colWidth.length; i++) {
+      for (let j = 0; j < colWidth[i].length; j++) {
+        if (result[j]['wch'] < colWidth[i][j]['wch']) {
+          result[j]['wch'] = colWidth[i][j]['wch'];
         }
       }
     }
-    ws['!cols'] = colWidth
+    ws['!cols'] = result;
   }
 
   // 设置每行的高度

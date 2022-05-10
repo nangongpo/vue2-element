@@ -1,17 +1,17 @@
 import Vue from 'vue'
-
-import Cookies from 'js-cookie'
-
-import 'normalize.css/normalize.css'
-
-import Element from 'element-ui'
-import './styles/element-variables.scss'
-import './styles/index.scss'
-import './components/Element'
-
 import App from './App.vue'
 import router from './router'
 import store from './store'
+
+import Cookies from 'js-cookie'
+
+import 'normalize.css/normalize.css' // a modern alternative to CSS resets
+
+import ElementUI from './vendor/Element.js'
+import './styles/element-variables.scss'
+
+import '@/styles/global.scss'
+import './components/Element'
 
 import './icons' // icon
 import './permission' // permission control
@@ -27,13 +27,13 @@ import * as filters from './filters' // global filters
  * Currently MockJs will be used in the production environment,
  * please remove it before going online ! ! !
  */
-if (process.env.NODE_ENV === 'production') {
-  const { mockXHR } = require('../mock')
-  mockXHR()
-}
+// if (process.env.NODE_ENV === 'production') {
+//   const { mockXHR } = require('../mock')
+//   mockXHR()
+// }
 
-Vue.use(Element, {
-  size: Cookies.get('size') || 'medium' // set element-ui default size
+Vue.use(ElementUI, {
+  size: Cookies.get('size') || 'small'
 })
 
 // register global utility filters

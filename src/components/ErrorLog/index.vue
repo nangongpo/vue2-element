@@ -6,13 +6,13 @@
       </el-button>
     </el-badge>
 
-    <el-dialog :visible.sync="dialogTableVisible" width="80%" append-to-body>
+    <el-dialog :visible.sync="dialogTableVisible" top="5vh" width="80%" custom-class="scroll" append-to-body>
       <div slot="title">
-        <span style="padding-right: 10px;">Error Log</span>
-        <el-button size="mini" type="primary" icon="el-icon-delete" @click="clearAll">Clear All</el-button>
+        <span style="padding-right: 10px;">错误日志</span>
+        <el-button size="mini" type="primary" icon="el-icon-delete" @click="clearAll">清除所有</el-button>
       </div>
-      <el-table :data="errorLogs" border>
-        <el-table-column label="Message">
+      <el-table :data="errorLogs" border class="mb-10">
+        <el-table-column label="主要消息">
           <template slot-scope="{row}">
             <div>
               <span class="message-title">Msg:</span>
@@ -36,7 +36,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="Stack">
+        <el-table-column label="堆栈信息">
           <template slot-scope="scope">
             {{ scope.row.err.stack }}
           </template>
@@ -68,7 +68,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .message-title {
   font-size: 16px;
   color: #333;

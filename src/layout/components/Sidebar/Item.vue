@@ -1,4 +1,6 @@
 <script>
+import RenderIcon from '@/components/RenderIcon'
+
 export default {
   name: 'MenuItem',
   functional: true,
@@ -17,11 +19,7 @@ export default {
     const vnodes = []
 
     if (icon) {
-      if (icon.includes('el-icon')) {
-        vnodes.push(<i class={[icon, 'sub-el-icon']} />)
-      } else {
-        vnodes.push(<svg-icon icon-class={icon}/>)
-      }
+      vnodes.push(<RenderIcon icon={icon} />)
     }
 
     if (title) {
@@ -31,11 +29,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.sub-el-icon {
-  color: currentColor;
-  width: 1em;
-  height: 1em;
-}
-</style>

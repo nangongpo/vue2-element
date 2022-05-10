@@ -14,6 +14,8 @@
 </template>
 
 <script>
+import settings from '@/settings'
+
 export default {
   name: 'SidebarLogo',
   props: {
@@ -24,14 +26,16 @@ export default {
   },
   data() {
     return {
-      title: 'Vue Element Admin',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      title: settings.title,
+      logo: '/logo.png'
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '~@/styles/base/_variables.scss';
+
 .sidebarLogoFade-enter-active {
   transition: opacity 1.5s;
 }
@@ -42,40 +46,38 @@ export default {
 }
 
 .sidebar-logo-container {
-  position: relative;
   width: 100%;
-  height: 50px;
-  line-height: 50px;
-  background: #2b2f3a;
+  height: $sidebarTitleHeight;
   text-align: center;
-  overflow: hidden;
 
   & .sidebar-logo-link {
     height: 100%;
     width: 100%;
+    padding: 20px;
 
     & .sidebar-logo {
-      width: 32px;
-      height: 32px;
-      vertical-align: middle;
-      margin-right: 12px;
+      width: 50px;
+      padding-bottom: 10px
     }
 
     & .sidebar-title {
-      display: inline-block;
       margin: 0;
       color: #fff;
-      font-weight: 600;
-      line-height: 50px;
-      font-size: 14px;
-      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
-      vertical-align: middle;
+      font-weight: 700;
+      font-size: 18px;
+      line-height: 24px;
     }
   }
 
   &.collapse {
-    .sidebar-logo {
-      margin-right: 0px;
+    height: $headerHeight;
+    line-height: $headerHeight;
+    & .sidebar-logo-link {
+      padding: 0;
+      & .sidebar-logo {
+        padding: 8px;
+        vertical-align: middle;
+      }
     }
   }
 }

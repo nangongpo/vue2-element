@@ -6,42 +6,96 @@
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
-        <search id="header-search" class="right-menu-item" />
+        <el-tooltip content="应用检索" effect="dark" placement="bottom">
+          <search id="header-search" class="right-menu-item" />
+        </el-tooltip>
 
         <error-log class="errLog-container right-menu-item hover-effect" />
 
-        <screenfull id="screenfull" class="right-menu-item hover-effect" />
+        <el-tooltip content="全屏" effect="dark" placement="bottom">
+          <screenfull id="screenfull" class="right-menu-item hover-effect" />
+        </el-tooltip>
 
-        <el-tooltip content="Global Size" effect="dark" placement="bottom">
+        <el-tooltip content="布局大小" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip>
 
+        <!-- <div class="right-menu-item hover-effect">
+          <el-badge is-dot="" class="icon-badge" @click="handleCommand('notice')">
+            <i class="el-icon-message-solid" />
+          </el-badge>
+        </div> -->
+
       </template>
 
-      <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="click">
+      <el-dropdown size="small" trigger="click" class="right-menu-item hover-effect" @command="handleCommand">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+          <svg-icon icon-class="user" />
+          <span> {{ userInfo.real_name }}</span>
         </div>
         <el-dropdown-menu slot="dropdown">
-          <router-link to="/profile/index">
-            <el-dropdown-item>Profile</el-dropdown-item>
-          </router-link>
-          <router-link to="/">
-            <el-dropdown-item>Dashboard</el-dropdown-item>
-          </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-element-admin/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
-          <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
-          </el-dropdown-item>
+          <el-dropdown-item command="login">登录信息</el-dropdown-item>
+          <el-dropdown-item command="updatePassword">密码修改</el-dropdown-item>
+          <el-dropdown-item divided command="logout">退出</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
+      <div class="right-menu-item hover-effect" @click="handleCommand('logout')">
+        <svg-icon icon-class="exit" />
+        <span> 退出</span>
+      </div>
     </div>
+
+    <el-dialog
+      :visible.sync="dialogConfig.visible"
+      :title="dialogConfig.title"
+      :width="dialogConfig.width"
+      :close-on-click-modal="false"
+      top="0"
+      center
+      append-to-body
+      class="center"
+      @open="handleFormReset('dialog')"
+    >
+      <base-form
+        ref="dialog"
+        :fields="dialogConfig.fields"
+        :model="dialogConfig.model"
+        :patterns="dialogConfig.patterns"
+        :label-width="dialogConfig.labelWidth"
+        :value-width="dialogConfig.valueWidth"
+        :class="dialogConfig.formClass"
+        label-as-placeholder
+        label-suffix=":"
+      >
+        <template #input="{ prop, attrs }">
+          <el-input
+            v-model="dialogConfig.model[prop]"
+            v-bind="attrs"
+          />
+        </template>
+      </base-form>
+      <template v-if="dialogConfig.showFooter" #footer>
+        <el-button @click="dialogConfig.visible = false">取 消</el-button>
+        <el-button :loading="dialogConfig.loading" type="primary" @click="handleSubmit">确 定</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      :visible.sync="messageDialog.visible"
+      :title="messageDialog.title"
+      :width="messageDialog.width"
+      :close-on-click-modal="false"
+      :show-close="false"
+      append-to-body
+      center
+      top="0"
+      class="center"
+      custom-class="message-dialog"
+    >
+      <div style="padding: 20px 0 40px 0;" class="text-center font-16">
+        <render-jsx :value="messageDialog.message" />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -53,6 +107,10 @@ import ErrorLog from '@/components/ErrorLog'
 import Screenfull from '@/components/Screenfull'
 import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
+import BaseForm from '@/components/BaseForm'
+import RenderJsx from '@/components/RenderJsx'
+import { countDown } from '@/utils'
+import { axiosPost } from '@/api'
 
 export default {
   components: {
@@ -61,37 +119,215 @@ export default {
     ErrorLog,
     Screenfull,
     SizeSelect,
-    Search
+    Search,
+    BaseForm,
+    RenderJsx
+  },
+  data() {
+    return {
+      dialogConfig: {
+        formClass: '',
+        visible: false,
+        loading: false,
+        action: '',
+        title: '',
+        width: '',
+        labelWidth: '',
+        valueWidth: '',
+        fields: [],
+        model: {},
+        patterns: {},
+        showFooter: false
+      },
+      messageDialog: {
+        visible: false,
+        title: '',
+        width: '',
+        message: ''
+      }
+    }
   },
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar',
-      'device'
+      'device',
+      'userInfo',
+      'firstLogin'
     ])
+  },
+  mounted() {
+    this.firstLogin && this.showLoginInfo()
   },
   methods: {
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
+    handleCommand(command) {
+      const { showNoticeInfo, showLoginInfo, showResetPassword, logout } = this
+      switch (command) {
+        case 'notice':
+          showNoticeInfo()
+          break
+        case 'login':
+          showLoginInfo()
+          break
+        case 'updatePassword':
+          showResetPassword()
+          break
+        case 'logout':
+          logout()
+          break
+      }
+    },
+    handleSubmit() {
+      // eslint-disable-next-line no-unused-vars
+      const { dialogConfig, userInfo, logout } = this
+      const { action, model } = dialogConfig
+      this.$refs.dialog.validate(valid => {
+        if (!valid) return
+        switch (action) {
+          case 'reset_password':
+            dialogConfig.loading = true
+            axiosPost('/user/reset_password/', { username: userInfo.card_id, password: model.password }).then(() => {
+              dialogConfig.visible = false
+              dialogConfig.loading = false
+
+              countDown((second) => {
+                const visible = second > 0
+                if (visible) {
+                  this.messageDialog = {
+                    visible,
+                    title: '密码修改',
+                    width: '400px',
+                    message: (h) => <div>操作成功, <strong class='text-primary'>{second}s</strong> 后自动进入登录页面</div>
+                  }
+                  return
+                }
+                this.messageDialog.visible = visible
+                logout()
+              }, 3)
+            }).catch(() => {
+              dialogConfig.loading = false
+            })
+            break
+        }
+      })
+    },
+    showResetPassword() {
+      this.dialogConfig = {
+        visible: true,
+        action: 'reset_password',
+        showFooter: true,
+        loading: false,
+        title: '密码修改',
+        width: '400px',
+        labelWidth: '105px',
+        valueWidth: '240px',
+        fields: [
+          {
+            'label': '输入密码',
+            'prop': 'password',
+            'prop_type': 'string',
+            'prop_width': 1,
+            'display': true,
+            'editable': true,
+            'required': true,
+            'render': 'input'
+          },
+          {
+            'label': '确认密码',
+            'prop': 'confirm_password',
+            'prop_type': 'string',
+            'prop_width': 1,
+            'display': true,
+            'editable': true,
+            'required': true,
+            'render': 'input'
+          }
+        ],
+        model: { password: '', confirm_password: '' },
+        patterns: {
+          password: {
+            validator: (rule, value, callback) => {
+              const { confirm_password } = this.dialogConfig.model
+              if (value === '') {
+                callback(new Error('请输入密码'))
+              } else {
+                if (confirm_password !== '') {
+                  this.$refs.dialog.validateField('confirm_password')
+                }
+                callback()
+              }
+            }
+          },
+          confirm_password: {
+            validator: (rule, value, callback) => {
+              const { password } = this.dialogConfig.model
+              if (value === '') {
+                callback(new Error('请再次输入密码'))
+              } else if (value !== password) {
+                callback(new Error('两次输入密码不一致!'))
+              } else {
+                callback()
+              }
+            }
+          }
+        }
+      }
+    },
+    async showLoginInfo() {
+      // eslint-disable-next-line no-unused-vars
+      const { userInfo = {}, $createElement: h } = this
+
+      const fields = [
+        { label: '真实姓名', prop: 'real_name' },
+        { label: '所属角色', prop: 'role_name' },
+        { label: '最近一次登录时间', prop: 'last_login_time' }
+      ]
+
+      const vNodes = fields.map(item => {
+        return h('div', { class: 'info-item' }, `${item.label}：${userInfo[item.prop] || '暂无'}`)
+      })
+
+      this.$msgbox({
+        title: '登录信息',
+        customClass: 'login-info',
+        center: true,
+        message: h(
+          'div',
+          { class: 'info-wrapper text-left' },
+          vNodes
+        ),
+        showCancelButton: false,
+        showConfirmButton: false,
+        closeOnClickModal: false,
+        callback: () => {}
+      })
+    },
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    handleFormReset(formName) {
+      this.$refs[formName] && this.$refs[formName].resetFields()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '~@/styles/base/_variables.scss';
+
 .navbar {
-  height: 50px;
+  height: $headerHeight;
   overflow: hidden;
   position: relative;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  padding: 0 15px;
 
   .hamburger-container {
-    line-height: 46px;
+    line-height: $headerHeight - 4;
     height: 100%;
     float: left;
     cursor: pointer;
@@ -105,6 +341,7 @@ export default {
 
   .breadcrumb-container {
     float: left;
+    line-height: $headerHeight;
   }
 
   .errLog-container {
@@ -115,7 +352,7 @@ export default {
   .right-menu {
     float: right;
     height: 100%;
-    line-height: 50px;
+    line-height: $headerHeight;
 
     &:focus {
       outline: none;
@@ -140,10 +377,8 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 30px;
 
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
 
         .user-avatar {
@@ -162,6 +397,19 @@ export default {
         }
       }
     }
+  }
+}
+
+.login-info {
+  .info-wrapper {
+    padding: 0 10px;
+    font-size: 16px;
+    .info-item {
+      padding: 5px 0;
+    }
+  }
+  .backlog-info {
+    padding: 10px 0;
   }
 }
 </style>

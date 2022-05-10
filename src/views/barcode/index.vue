@@ -81,9 +81,12 @@
 </template>
 
 <script>
+import { ColorPicker } from 'element-ui'
 import JsBarcode from 'jsbarcode2'
+
 export default {
   name: 'Barcode',
+  components: { 'el-color-picker': ColorPicker },
   data() {
     return {
       barcode: null,

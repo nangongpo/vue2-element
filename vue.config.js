@@ -1,6 +1,6 @@
 'use strict'
 const path = require('path')
-const defaultSettings = require('./src/settings.js')
+const settings = require('./src/settings.js')
 
 const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
@@ -10,33 +10,22 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Element Admin' // page title
-const publicPath = '/vue2-element/'
+const name = settings.title // page title
+const publicPath = '/'
 const outputDir = 'dist'
 const assetsDir = 'static'
 
-// If your port is set to 80,
-// use administrator privileges to execute the command line.
-// For example, Mac: sudo npm run
-// You can change the port by the following method:
-// port = 9527 npm run dev OR npm run dev --port = 9527
 const port = process.env.port || process.env.npm_config_port || 9527 // dev port
 
-// All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
-  /**
-   * You will need to set publicPath if you plan to deploy your site under a sub path,
-   * for example GitHub Pages. If you plan to deploy your site to https://foo.github.io/bar/,
-   * then publicPath should be set to "/bar/".
-   * In most cases please use '/' !!!
-   * Detail: https://cli.vuejs.org/config/#publicpath
-   */
   publicPath,
   outputDir,
   assetsDir,
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
+    disableHostCheck: true,
+    host: '0.0.0.0',
     port: port,
     open: true,
     overlay: {
@@ -44,6 +33,12 @@ module.exports = {
       errors: true
     },
     before: require('./mock/mock-server.js')
+    // proxy: {
+    //   [process.env.VUE_APP_BASE_API]: {
+    //     target: `http://localhost:${port}`, // 外网测试服务
+    //     changeOrigin: true
+    //   }
+    // }
   },
   configureWebpack: (config) => {
     const plugins = []
@@ -156,5 +151,20 @@ module.exports = {
           config.optimization.runtimeChunk('single')
         }
       )
+  },
+  css: {
+    // 是否使用css分离插件 ExtractTextPlugin
+    extract: process.env.NODE_ENV !== 'development',
+    // 开启 CSS source maps?
+    sourceMap: false,
+    // css预设器配置项
+    loaderOptions: {
+      // `scss` 语法会要求语句结尾必须有分号，`sass` 则要求必须没有分号
+      // 在这种情况下，我们可以使用 `scss` 选项，对 `scss` 语法进行单独配置
+      // 注意：在 sass-loader v8 中，这个选项名是 "prependData", 更高版本使用additionalData
+      scss: {
+        // prependData: `@import "~@/styles/variables.scss";@import "~@/styles/mixin.scss";`
+      }
+    }
   }
 }

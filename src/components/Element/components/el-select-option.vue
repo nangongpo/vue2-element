@@ -1,8 +1,9 @@
 <script>
 /* eslint-disable no-unused-vars */
+import { byteLength } from '@/utils'
 export default {
-  functional: true,
   props: {
+    value: [Array, String, Number],
     options: {
       type: Array,
       default() {
@@ -10,6 +11,7 @@ export default {
       }
     },
     multiple: Boolean,
+    filterMethod: Function,
     defaultProps: { // 映射关系对应键名称
       type: Object,
       default() {
@@ -19,34 +21,103 @@ export default {
           disabled: 'disabled'
         }
       }
+    },
+    maxlength: { // 多选
+      type: Number,
+      default: 100
+    }
+  },
+  data() {
+    return {
+      newOptions: []
+    }
+  },
+  watch: {
+    value: {
+      handler: 'updateOptionsByValue',
+      deep: true,
+      immediate: true
+    }
+  },
+  methods: {
+    filterOptions(val) {
+      const { options, defaultProps, maxlength } = this
+      if (!val) {
+        // console.log(options)
+        this.newOptions = options.slice(0, maxlength)
+        return
+      }
+      this.newOptions = options.filter(v => v[defaultProps.label].indexOf(val) > -1).slice(0, maxlength)
+    },
+    updateOptionsByValue(value) {
+      const { multiple, options, maxlength, defaultProps } = this
+      if (multiple) {
+        this.newOptions = options
+        return
+      }
+      const newOptions = options.slice(0, maxlength)
+      if (!value) {
+        this.newOptions = newOptions
+        return
+      }
+
+      const otherOptions = options.slice(maxlength)
+      const hasOption = otherOptions.find(v => v[defaultProps.value] === value)
+
+      if (hasOption) {
+        newOptions[newOptions.length - 1] = hasOption
+      }
+      this.newOptions = newOptions
+    },
+    onMultiple(isCheckAll) {
+      const { defaultProps, newOptions } = this
+      const newValue = isCheckAll ? newOptions.map(v => v[defaultProps.value]) : []
+      this.$emit('input', newValue)
+    },
+    getOptionHeader() {
+      const { onMultiple } = this
+      return <li class='el-select-dropdown__header' key='option-header'>
+        <el-button size='middle' type='text' icon='el-icon-check' onClick={() => onMultiple(true)}>全选</el-button>
+        <el-button size='middle' type='text' icon='el-icon-close' onClick={() => onMultiple(false)}>全不选</el-button>
+      </li>
     }
   },
   render(h, context) {
-    const { data, props, listeners, children } = context
-    const { options = [], multiple, defaultProps } = props
+    const { value, multiple, filterMethod, defaultProps, newOptions, filterOptions, getOptionHeader, $attrs, $listeners, updateOptionsByValue } = this
 
-    const onMultiple = (isCheckAll) => {
-      const newValue = isCheckAll ? options.map(v => v[defaultProps.value]) : []
-      listeners.input && listeners.input(newValue)
-    }
-    const getOptionHeader = () => <li class='el-select-dropdown__header' key='option-header'>
-      <el-button size='middle' type='text' icon='el-icon-check' onClick={() => onMultiple(true)}>全选</el-button>
-      <el-button size='middle' type='text' icon='el-icon-close' onClick={() => onMultiple(false)}>全不选</el-button>
-    </li>
+    const { focus, ...restListeners } = $listeners
+    // 计算选项的最小宽度
+    const minWidth = newOptions.reduce((t, v) => {
+      const len = byteLength(v.label) * 7
+      return len > t ? len : t
+    }, 0)
 
-    const scopedSlots = data.scopedSlots || {}
+    const scopedSlots = this.$slots || {}
     const optionSlot = scopedSlots.option
-    optionSlot && delete scopedSlots.option
+    scopedSlots.option = undefined
 
-    return <el-select { ...data} value-key={defaultProps.value} multiple={multiple}>
+    const onFocus = (event) => {
+      updateOptionsByValue(value)
+      focus && focus(event)
+    }
+
+    return <el-select
+      value={value}
+      multiple={multiple}
+      filterMethod={filterMethod || filterOptions}
+      attrs={$attrs}
+      onFocus={onFocus}
+      on={restListeners}
+    >
       { multiple && getOptionHeader() }
       {
-        options.map((item, index) => {
+        newOptions.map((item, index) => {
           return <el-option
             key={index}
             label={item[defaultProps.label]}
             value={item[defaultProps.value]}
-            disabled={item[defaultProps.disabled]}>
+            disabled={item[defaultProps.disabled]}
+            style={{ minWidth: `${minWidth}px` }}>
             { optionSlot && optionSlot({ label: item[defaultProps.label], value: item[defaultProps.value] })}
           </el-option>
         })
@@ -58,7 +129,7 @@ export default {
           </template>
         })
       }
-      { children }
+      { this.$slots.default && this.$slots.default() }
     </el-select>
   }
 }
