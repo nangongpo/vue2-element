@@ -19,6 +19,26 @@
   - [x] [纯函数都放这里](src/utils/util.js)
     - [x] 生成圆形电子章，输出png格式的base图片
 
+## 创建静态资源分支gh-pages
+
+- 首次创建
+  ```
+  npm run build:prod(主分支打包)
+  git checkout -b gh-pages
+  git add -f dist
+  git commit '提交内容'
+  git subtree push --prefix=dist origin gh-pages
+  ```
+
+- 后续更新
+  ```
+  npm run build:prod(主分支打包)
+  git checkout gh-pages
+  git add -f dist
+  git commit '提交内容'
+  git subtree push --prefix=dist origin gh-pages
+  ```
+
 ## 项目构建
 ```
 npm install
