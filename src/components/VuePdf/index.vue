@@ -8,16 +8,17 @@
     >
       <div class="el-image-viewer__mask" />
       <div class="vue-pdf-wrapper">
-        <div class="pdf-control">
+        <div class="vue-pdf-control">
           <el-button @click="prev">上一页</el-button>
           <el-button @click="next">下一页</el-button>
-          <span class="page-num">
-            页码: <el-input-number v-model="page_num" :controls="false" @change="changePageNum" @blur="refreshPageNum" /> / <span v-text="page_count" /></span>
+          <span class="vue-pdf-page-num">
+            页码: <el-input-number v-model="page_num" :controls="false" @change="changePageNum" @blur="refreshPageNum" /> / <span v-text="page_count" />
+          </span>
           <el-button icon="el-icon-plus" @click="addscale" />
           <el-button icon="el-icon-minus" @click="minus" />
           <el-button id="prev" @click="closepdf">关闭</el-button>
         </div>
-        <div class="pdf-content">
+        <div class="vue-pdf-content">
           <canvas
             id="the-canvas"
             v-loading="pageRendering"
@@ -35,13 +36,14 @@ import { PopupManager } from 'element-ui/src/utils/popup'
 import load from './dynamicLoadScript'
 import { getLocalFile } from '@/api/file'
 
-const pdfUtilSrc = getLocalFile('/pdf/pdf.js')
+const pdfSrc = getLocalFile('/pdf/pdf.js')
+const pdfWorkerSrc = getLocalFile('/pdf/pdf.worker.js')
 
 export default {
   name: 'VuePdf',
   props: {
     visible: Boolean,
-    href: String,
+    src: String,
     zIndex: {
       type: Number,
       default: 2000
@@ -80,24 +82,24 @@ export default {
   },
   methods: {
     init(visible) {
-      const { href, initPDF } = this
+      const { src, initPDF } = this
       if (!visible) return
-      if (!href) return
+      if (!src) return
       this.pageNum = 1
 
-      load(pdfUtilSrc, (err) => {
+      load(pdfSrc, (err) => {
         if (err) {
           this.$message.error(err.message)
           return
         }
-        initPDF(href)
+        initPDF(src)
       })
     },
-    initPDF(href) {
+    initPDF(src) {
       const { pageNum, renderPage } = this
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = getLocalFile('/pdf/pdf.worker.js')
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc
       // 初始化pdf
-      window.pdfjsLib.getDocument(href).then(pdfDoc => {
+      window.pdfjsLib.getDocument(src).then(pdfDoc => {
         this.pdfDoc = pdfDoc
         this.page_count = pdfDoc.numPages
         renderPage(pageNum)
@@ -198,38 +200,38 @@ export default {
 
 <style lang="scss" scoped>
 .vue-pdf {
-  .pdf-control {
+  &-control {
     height: 80px;
     line-height: 80px;
   }
-  .pdf-content {
+  &-content {
     height: calc(100% - 60px);
     overflow-y: auto;
   }
-  .page-num {
+  &-page-num {
     color: #FFF;
     margin: 0px 5px;
+    .el-input-number {
+      width: 60px;
+    }
   }
-  .el-input-number {
-    width: 60px;
+  &-mask-layer {
+    position: fixed;
+    background-color: #000;
+    opacity: 0.8;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
-}
-.vue-pdf-mask-layer {
-  position: fixed;
-  background-color: #000;
-  opacity: 0.8;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-.vue-pdf-wrapper {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  width: 100%;
+  &-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    width: 100%;
+  }
 }
 </style>

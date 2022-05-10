@@ -111,6 +111,18 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/preview-pdf',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/preview-pdf/index'),
+        name: 'PreviewPdf',
+        meta: { title: '预览PDF', icon: 'icon', noCache: false }
+      }
+    ]
+  },
+  {
     path: '/tinymce',
     component: Layout,
     children: [
