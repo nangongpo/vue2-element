@@ -1,6 +1,5 @@
 <script>
 /* eslint-disable no-unused-vars */
-import { getMapTranslateOptions } from '@/utils/options'
 
 import {
   renderError,
@@ -42,7 +41,7 @@ export default {
     const { width, fields, rules, labelAsPlaceholder } = props
     const model = data.attrs.model
     // 转义列表
-    const translateOptions = getMapTranslateOptions()
+    const translateOptions = {}
     const getLabelByOptions = (prop, value, defaultValue = '-') => {
       const options = translateOptions[prop]
       if (!Array.isArray(options)) return value || defaultValue

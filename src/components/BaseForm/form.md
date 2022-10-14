@@ -1,9 +1,4 @@
-base-table组件是对pl-table的二次封装
-
-api参考： https://github.com/livelyPeng/pl-table/wiki/pl-table-api?spm=a2c6h.14275010.0.0.2b901ed0oA9TWC
-其他api参考： https://element.eleme.cn/#/zh-CN/component/table#table-attributes
-
-## 配置项说明, 下列部分属性尚未支持
+## 配置项说明
 
 | 字段 | 描述 | 数据类型 | 默认值 |
 | -- | -- | -- | -- |

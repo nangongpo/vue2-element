@@ -1,5 +1,5 @@
 /**
- *Created by PanJiaChen on 16/11/29.
+ * 打开新的窗口
  * @param {Sting} url
  * @param {Sting} title
  * @param {Number} w

@@ -1,10 +1,6 @@
 <script>
-/* eslint-disable no-unused-vars */
-import {
-  getLabelByOptions,
-  getComponentAttrs,
-  renderError
-} from './utils'
+import { renderError, isValidValue } from '@/utils'
+import { getLabelByOptions, getComponentAttrs } from './utils'
 
 export default {
   functional: true,
@@ -14,12 +10,13 @@ export default {
     item: Object,
     parent: Object
   },
+  renderError,
   render(h, context) {
     const { scope = {}, config = {}, item = {}, parent = {}} = context.props
     const { allOptions } = parent.props
-    const { render, prop, formatValue, editable } = config
-
-    let value = scope.row[prop]
+    const { render, prop, formatValue, editable, vprop, formatOptions } = config
+    const valueList = vprop.split('.')
+    let value = valueList.reduce((t, v) => t && isValidValue(t[v]) ? t[v] : undefined, scope.row)
     scope['value'] = value
     scope['cellProp'] = prop
     scope['cellRender'] = render
@@ -28,10 +25,11 @@ export default {
     scope['setValue'] = (newValue) => {
       scope.row[prop] = newValue
     }
+    const options = formatOptions ? formatOptions(allOptions) : allOptions[prop]
     // 有转义函数
     value = formatValue
       ? formatValue(config, scope.row, allOptions)
-      : getLabelByOptions(prop, value, allOptions)
+      : getLabelByOptions(prop, value, options)
     scope['cellValue'] = value
 
     if (typeof (render) === 'function') {
@@ -39,7 +37,6 @@ export default {
     }
 
     return [value]
-  },
-  renderError
+  }
 }
 </script>

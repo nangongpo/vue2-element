@@ -1,11 +1,6 @@
 <script>
-/* eslint-disable no-unused-vars */
-import {
-  getComponentAttrs,
-  getLabelByOptions,
-  numberToPx,
-  renderError
-} from './utils'
+import { renderError } from '@/utils'
+import { getComponentAttrs, getLabelByOptions, numberToPx } from './utils'
 
 export default {
   functional: true,
@@ -14,13 +9,16 @@ export default {
     item: Object,
     parent: Object
   },
+  renderError,
   render(h, context) {
     const { config = {}, item = {}, parent = {}} = context.props
     const { labelAsPlaceholder, allOptions, model, valueWidth, filterOptionBy } = parent.props
     const { render, label, value_width, prop, placeholder, editable, formatValue, formatOptions } = config
     // 表单元素的宽度
     const width = numberToPx(value_width || valueWidth)
-    let options = formatOptions ? formatOptions(allOptions) : allOptions[prop]
+
+    let options = config.options || (formatOptions ? formatOptions(allOptions) : allOptions[prop])
+
     // 过滤选项无效值
     if (Array.isArray(options) && filterOptionBy) {
       options = options.filter(v => Object.prototype.hasOwnProperty.call(v, filterOptionBy) ? v[filterOptionBy] : true)
@@ -44,8 +42,7 @@ export default {
       config,
       prop,
       value,
-      options: options,
-      attrs: getComponentAttrs({ ...item, placeholder: newPlaceholder, disabled: !editable, style: { width }}),
+      attrs: getComponentAttrs({ ...item, options, placeholder: newPlaceholder, disabled: !editable, style: { width }}),
       setValue: (newValue) => {
         const { listeners } = parent
         if (!listeners['update:model']) {
@@ -65,7 +62,6 @@ export default {
     }
 
     return scopedSlots[render](elementAttrs)
-  },
-  renderError
+  }
 }
 </script>

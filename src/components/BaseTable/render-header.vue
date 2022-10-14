@@ -1,11 +1,13 @@
 <script>
-/* eslint-disable no-unused-vars */
+import { renderError } from '@/utils'
+
 export default {
   functional: true,
   props: {
     scope: Object,
     label: [String, Function]
   },
+  renderError,
   render(h, context) {
     const { props } = context
     const { label } = props

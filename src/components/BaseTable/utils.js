@@ -1,40 +1,31 @@
-export function getLabelByOptions(prop, value, allOptions = {}) {
+import { isValidValue } from '@/utils'
+
+export function getLabelByOptions(prop, value, options) {
   // 转义列表
   const defaultValue = '-'
   if (!prop) return
-  const options = allOptions[prop]
   if (!Array.isArray(options)) return isValidValue(value) ? value : defaultValue
-
   const getLabel = (arr, value) => {
-    return arr.reduce((t, v) => {
-      const hasValue = v.value === value
-      if (hasValue) {
-        return v.label
-      }
-      if (Array.isArray(v.children) && !!v.children.length) {
-        return getLabel(v.children, value) || t
-      }
-      return t
-    }, '')
+    if (!Array.isArray(value)) {
+      return arr.reduce((t, v) => {
+        const hasValue = v.value === value
+        if (hasValue) {
+          return v.label
+        }
+        if (Array.isArray(v.children) && !!v.children.length) {
+          return getLabel(v.children, value) || t
+        }
+        return t
+      }, value)
+    } else {
+      return value.reduce((t, v) => {
+        const val = arr.find(item => item.value === v)
+        return val ? [...t, val.label] : t
+      }, []).join(',')
+    }
   }
   const newValue = getLabel(options, value)
   return isValidValue(newValue) ? newValue : defaultValue
-}
-
-// 是否是有效值， 排除 null、undefined、[]、[undefined] 的情况
-export function isValidValue(value) {
-  if (['number', 'boolean'].includes(typeof (value))) {
-    return true
-  }
-  if (Array.isArray(value)) {
-    value = value.filter(v => isValidValue(v))
-    return value.length > 0
-  }
-  return !!value
-}
-
-export function renderError(h, err) {
-  return h('pre', { style: { color: 'red' }}, err.stack)
 }
 
 // 数字转px
@@ -103,4 +94,28 @@ export function getTableFieldByTableData(tableData = [], config = {}) {
   return tableData.reduce((t, v) => {
     return v[prop] ? [...t, { prop, name: typeof (label) === 'function' ? label(v) : (v[label] || v[prop]), state: true, disabled: false, config: v }] : t
   }, [])
+}
+// 根据指定字段处理导出的数据
+export function excel_data_format(tableFields = [], tableData = [], allOptions, checkedField = []) {
+  let fieldMap = tableFields
+  if (checkedField.length) {
+    fieldMap = checkedField.map((item) => {
+      return tableFields.find((obj) => obj.prop === item)
+    })
+  } else {
+    fieldMap = tableFields.reduce((t, v) => v.prop !== 'index' ? [...t, v] : t, [])
+  }
+  const data = tableData.reduce((t, v) => {
+    const row = fieldMap.reduce((oldVal, config) => {
+      const { prop, formatValue, formatOptions } = config
+      const options = formatOptions ? formatOptions(allOptions) : allOptions[prop]
+      const value = formatValue
+        ? formatValue(config, v, allOptions)
+        : getLabelByOptions(prop, v[prop], options)
+      return [...oldVal, value]
+    }, [])
+    return [...t, row]
+  }, [])
+  const header = fieldMap.reduce((t, v) => [...t, v.label], [])
+  return { data: data, header: header }
 }

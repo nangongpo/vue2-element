@@ -1,9 +1,12 @@
 <script>
 /* eslint-disable no-unused-vars */
 import { PlTable, PlTableColumn } from 'pl-table'
-import RenderHeader from './render-header'
+import RenderHeader from './render-header.vue'
 import RenderCell from './render-cell.vue'
+
+import { renderError } from '@/utils'
 import { numberToPx, getTableFieldData, getTableFieldByTableData } from './utils'
+
 import './pl-table.css'
 
 export { getTableFieldData, getTableFieldByTableData }
@@ -14,6 +17,7 @@ const cacheConfig = {}
 export default {
   functional: true,
   props: {
+    height: [Number, String],
     fields: {
       type: Array,
       default() {
@@ -23,7 +27,9 @@ export default {
     actionAttrs: {
       type: Object,
       default() {
-        return {}
+        return {
+          fixed: 'right'
+        }
       }
     },
     allOptions: {
@@ -38,18 +44,19 @@ export default {
     },
     pageSize: {
       type: Number,
-      default: 10
+      default: 50
     },
     pageSizes: {
       type: Array,
       default() {
-        return [10, 20, 30, 50]
+        return [10, 20, 50, 100, 200]
       }
     }
   },
+  renderError,
   render(h, context) {
     const { data, props, scopedSlots } = context
-    const { fields, actionAttrs, stripe, pageSize, pageSizes } = props
+    const { height, paginationShow, fields, actionAttrs, stripe, pageSize, pageSizes } = props
 
     // 将pageSize添加到pageSizes中
     let newPageSizes = pageSizes
@@ -61,45 +68,59 @@ export default {
       newPageSizes = cacheConfig['pageSizes'] || pageSizes
     }
 
-    const getTableColumn = (arr = []) => {
-      return arr.reduce((acc, item) => {
-        const { table_type, other_attrs = {}, label, prop, prop_width, prop_min_width, null_value_display, editable, display, children = [], ...restItem } = item
+    const createTableColumn = (item, vprop) => {
+      const { table_type, other_attrs = {}, label, prop, prop_width, prop_min_width, editable, display = true, null_value_display = true, children = [], ...restItem } = item
+      item.vprop = vprop
+      // 不显示跳过
+      if (!display) {
+        return
+      }
+      const newLabel = typeof (label) === 'string' ? label : undefined
+      const tmpScopedSlots = {}
 
-        // 不显示跳过
-        if (!display) {
-          return acc
-        }
-        const newLabel = typeof (label) === 'string' ? label : undefined
-        const tmpScopedSlots = {}
-
-        const needIgnoreColumn = ['selection', 'index', 'expand'].includes(table_type)
-        if (!needIgnoreColumn) {
-          if (!newLabel) {
-            tmpScopedSlots['header'] = (scope) => {
-              return <RenderHeader scope={scope} label={label} />
-            }
-          }
-          tmpScopedSlots['default'] = (scope) => {
-            return <RenderCell scope={scope} config={item} item={restItem} parent={context} />
+      const needIgnoreColumn = ['selection', 'index', 'expand'].includes(table_type)
+      if (!needIgnoreColumn) {
+        if (!newLabel) {
+          tmpScopedSlots['header'] = (scope) => {
+            return <RenderHeader scope={scope} label={label} />
           }
         }
-        if (table_type === 'expand' && scopedSlots['expand']) {
-          tmpScopedSlots['default'] = (scope) => {
-            return scopedSlots['expand'](scope)
-          }
+        tmpScopedSlots['default'] = (scope) => {
+          return <RenderCell scope={scope} config={item} item={restItem} parent={context} />
         }
+      }
+      if (table_type === 'expand' && scopedSlots['expand']) {
+        tmpScopedSlots['default'] = (scope) => {
+          return scopedSlots['expand'](scope)
+        }
+      }
 
-        const tmpNodes = <PlTableColumn
-          type={table_type}
-          prop={prop}
-          label={newLabel}
-          width={numberToPx(prop_width)}
-          min-width={numberToPx(prop_min_width)}
-          attrs={other_attrs}
-          scopedSlots={tmpScopedSlots}>
-        </PlTableColumn>
-        return [...acc, tmpNodes]
-      }, [])
+      const tmpNodes = <PlTableColumn
+        type={table_type}
+        prop={vprop}
+        label={newLabel}
+        width={numberToPx(prop_width)}
+        min-width={numberToPx(prop_min_width)}
+        attrs={other_attrs}
+        scopedSlots={tmpScopedSlots}>
+        {
+          children.length ? children.map((item) => {
+            return createTableColumn(item, `${vprop}.${item.prop}`)
+          }) : ''
+        }
+      </PlTableColumn>
+      return tmpNodes
+    }
+
+    const actionColumnData = {
+      props: {
+        label: '操作',
+        prop: 'action',
+        ...actionAttrs
+      },
+      scopedSlots: {
+        default: scopedSlots.action
+      }
     }
 
     return <PlTable
@@ -107,14 +128,19 @@ export default {
       stripe={stripe}
       page-size={pageSize}
       page-sizes={newPageSizes}
+      style={{ height: numberToPx(height) }}
       class='base-table'>
-      { getTableColumn(fields) }
       {
-        scopedSlots.action && <PlTableColumn
-          label='操作'
-          prop='action'
-          attrs={actionAttrs}
-          scopedSlots={{ default: scopedSlots.action }} />
+        fields.reduce((acc, v) => {
+          const tmpNodes = createTableColumn(v, v.prop)
+          if (!tmpNodes) {
+            return acc
+          }
+          return [...acc, tmpNodes]
+        }, [])
+      }
+      {
+        scopedSlots.action && <PlTableColumn {...actionColumnData} />
       }
     </PlTable>
   }
@@ -122,5 +148,5 @@ export default {
 
 </script>
 <style lang="scss">
-@import '~@/styles/modules/base-table.scss';
+@import '~@/styles/base-table.scss';
 </style>

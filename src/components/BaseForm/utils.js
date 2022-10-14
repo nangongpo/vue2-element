@@ -1,3 +1,5 @@
+import { isValidValue, deepClone } from '@/utils'
+
 export function getLabelByOptions(prop, value, options = []) {
   const defaultValue = '-'
   if (!prop) return
@@ -18,22 +20,6 @@ export function getLabelByOptions(prop, value, options = []) {
   }
 
   return getLabel(options, value) || value || defaultValue
-}
-
-export function renderError(h, err) {
-  return h('pre', { style: { color: 'red' }}, err.stack)
-}
-
-// 是否是有效值， 排除 null、undefined、[]、[undefined] 的情况
-export function isValidValue(value) {
-  if (['number', 'boolean'].includes(typeof (value))) {
-    return true
-  }
-  if (Array.isArray(value)) {
-    value = value.filter(v => isValidValue(v))
-    return value.length > 0
-  }
-  return !!value
 }
 
 // 获取组件基础属性
@@ -103,12 +89,12 @@ export function getFormItemWidth(item, model) {
   }
   return itemWidth
 }
+
 // 初始化el-form的model
 export function getDefaultModel(fields = [], model = {}) {
-  const defaultModel = model
+  const defaultModel = deepClone(model)
   const mapPropType = {
     string: '',
-    number: undefined,
     array: []
   }
   const getDefaultValue = (item, model) => {
@@ -143,9 +129,15 @@ export function getDefaultRules(fields, rules = {}) {
   return defaultRules
 }
 
-// 格式化提交的参数, 通过读取配置项中的is_submit字段和检查有效值，过滤表单
-export function getSubmitFields(fields = [], model = {}) {
-  const submitForm = model
+/**
+ * 格式化提交的参数, 通过读取配置项中的is_submit字段和检查有效值，过滤表单
+ * @param {*} fields 表单字段
+ * @param {*} model 表单对象
+ * @param {*} otherModel 扩充表单对象
+ * @returns
+ */
+export function getSubmitFields(fields = [], model = {}, otherModel = {}) {
+  const submitForm = deepClone(model)
   const getSubmitValue = (item, model) => {
     const value = model[item.prop]
     if (isValidValue(value)) {
@@ -153,15 +145,14 @@ export function getSubmitFields(fields = [], model = {}) {
     }
   }
   fields.map(item => {
-    if (Object.prototype.hasOwnProperty.call(item, 'is_submit')) {
-      if (item.is_submit) {
-        submitForm[item.prop] = getSubmitValue(item, model)
+    if (item.prop) {
+      if (Object.prototype.hasOwnProperty.call(item, 'is_submit')) {
+        submitForm[item.prop] = item.is_submit ? getSubmitValue(item, model) : undefined
       } else {
-        submitForm[item.prop] = undefined
+        submitForm[item.prop] = getSubmitValue(item, model)
       }
-    } else {
-      submitForm[item.prop] = getSubmitValue(item, model)
     }
   })
-  return submitForm
+
+  return { ...submitForm, ...otherModel }
 }

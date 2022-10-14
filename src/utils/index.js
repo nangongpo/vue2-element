@@ -4,7 +4,6 @@
  * @param {string} type
  * @returns {string|boolean}
  */
-
 export function checkType(data, type) {
   const _type = Object.prototype.toString.call(data).slice(1, -1).split(' ')[1].toLowerCase()
   if (type) {
@@ -29,20 +28,84 @@ export function isJSON(str) {
   }
 }
 
+// 是否是有效值， 排除 null、undefined、[]、[undefined] 的情况
+export function isValidValue(value) {
+  if (['number', 'boolean'].includes(typeof (value))) {
+    return true
+  }
+  if (Array.isArray(value)) {
+    value = value.filter(v => isValidValue(v))
+    return value.length > 0
+  }
+  return !!value
+}
+
+// jsx使用
+export function renderError(h, err) {
+  return h('pre', { style: { color: 'red' }}, err.stack)
+}
+
 /**
- * 构造下拉选项
+ * 首字母大写
+ * @param {string} str
+ * @returns {string}
+ */
+export function upperFirst(str) {
+  if (!str) return ''
+  return str.slice(0, 1).toUpperCase() + str.slice(1)
+}
+
+/**
+ * 中横线命名改驼峰命名
+ * @param {string} str
+ * @returns {string}
+ */
+export function camelCase(str) {
+  if (!str) return ''
+  const s = str
+    .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+    .map(x => x.slice(0, 1).toUpperCase() + x.slice(1).toLowerCase())
+    .join('')
+  return s.slice(0, 1).toLowerCase() + s.slice(1)
+}
+
+/**
+ * 根据 precision（精度） 向下舍入 number
+ * @param {number}
+ * @param {number} [precision=0]
+ * @returns {number}
+ */
+export function floor(number, precision) {
+  const func = Math.floor
+  precision = precision == null ? 0 : (precision >= 0 ? Math.min(precision, 292) : Math.max(precision, -292))
+  if (precision) {
+    // Shift with exponential notation to avoid floating-point issues.
+    // See [MDN](https://mdn.io/round#Examples) for more details.
+    let pair = `${number}e`.split('e')
+    const value = func(`${pair[0]}e${+pair[1] + precision}`)
+
+    pair = `${value}e`.split('e')
+    return +`${pair[0]}e${+pair[1] - precision}`
+  }
+  return func(number)
+}
+
+/**
+ * 构造下拉选项, 对象形式的映射关系，键名统一转为字符串
  * @param {array|object} data
  * @param {object} config
  * @returns {object}
  */
 export function createOptions(data, config = {}) {
-  const { prop, group, props = {}} = config
-  const { label, value } = props
+  const { prop, group, props } = config
+  const { label = 'label', value = 'value' } = props || {}
   const groups = {}
   const createOption = (v) => {
     // 根据删除标记delete_time 添加is_valid
     const isValid = Object.prototype.hasOwnProperty.call(v, 'delete_time') ? !v.delete_time : true
-    return { label: v[label], value: v[value], is_valid: isValid, config: v }
+    return props
+      ? { label: v[label], value: v[value], is_valid: isValid, config: v }
+      : { label: v[label], value: v[value], is_valid: isValid }
   }
   // 数据源是 type: []
   if (checkType(data, 'array')) {
@@ -57,9 +120,7 @@ export function createOptions(data, config = {}) {
       })
     } else {
       if (prop) {
-        groups[prop] = config.props ? data.map((v, i) => {
-          return createOption(v, i)
-        }) : data
+        groups[prop] = data.map((v) => createOption(v))
       }
     }
   }
@@ -75,10 +136,8 @@ export function createOptions(data, config = {}) {
         groups[key] = arr
         continue
       }
-      // 映射关系是array
-      if (!config[key]) {
-        continue
-      }
+      config[key] = config[key] || {}
+
       const newGroups = createOptions(data[key], { ...config[key], prop: key })
       groups[key] = newGroups[key]
     }
@@ -290,6 +349,128 @@ export function param2Obj(url) {
 }
 
 /**
+ * @param {Function} func
+ * @param {number} wait
+ * @param {boolean} immediate
+ * @return {*}
+ */
+export function debounce(func, wait, immediate) {
+  let timeout, args, context, timestamp, result
+
+  const later = function() {
+    // 据上一次触发时间间隔
+    const last = +new Date() - timestamp
+
+    // 上次被包装函数被调用时间间隔 last 小于设定时间间隔 wait
+    if (last < wait && last > 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      // 如果设定为immediate===true，因为开始边界已经调用过了此处无需调用
+      if (!immediate) {
+        result = func.apply(context, args)
+        if (!timeout) context = args = null
+      }
+    }
+  }
+
+  return function(...args) {
+    context = this
+    timestamp = +new Date()
+    const callNow = immediate && !timeout
+    // 如果延时不存在，重新设定延时
+    if (!timeout) timeout = setTimeout(later, wait)
+    if (callNow) {
+      result = func.apply(context, args)
+      context = args = null
+    }
+
+    return result
+  }
+}
+
+/**
+ * This is just a simple version of deep copy
+ * Has a lot of edge cases bug
+ * If you want to use a perfect deep copy, use lodash's _.cloneDeep
+ * @param {Object} source
+ * @returns {Object}
+ */
+export function deepClone(source) {
+  if (!source && typeof source !== 'object') {
+    throw new Error('error arguments', 'deepClone')
+  }
+  const targetObj = source.constructor === Array ? [] : {}
+  Object.keys(source).forEach(keys => {
+    if (source[keys] && typeof source[keys] === 'object') {
+      targetObj[keys] = deepClone(source[keys])
+    } else {
+      targetObj[keys] = source[keys]
+    }
+  })
+  return targetObj
+}
+
+/**
+ * @param {Array} arr
+ * @returns {Array}
+ */
+export function uniqueArr(arr) {
+  return Array.from(new Set(arr))
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {string} className
+ */
+export function toggleClass(element, className) {
+  if (!element || !className) {
+    return
+  }
+  let classString = element.className
+  const nameIndex = classString.indexOf(className)
+  if (nameIndex === -1) {
+    classString += '' + className
+  } else {
+    classString =
+      classString.slice(0, nameIndex) +
+      classString.slice(nameIndex + className.length)
+  }
+  element.className = classString
+}
+
+/**
+ * Check if an element has a class
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ * @returns {boolean}
+ */
+export function hasClass(ele, cls) {
+  return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
+}
+
+/**
+ * Add class to element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ */
+export function addClass(ele, cls) {
+  if (!hasClass(ele, cls)) ele.className += ' ' + cls
+}
+
+/**
+ * Remove class from element
+ * @param {HTMLElement} elm
+ * @param {string} cls
+ */
+export function removeClass(ele, cls) {
+  if (hasClass(ele, cls)) {
+    const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
+    ele.className = ele.className.replace(reg, ' ')
+  }
+}
+
+/**
  * 旋转图片
  * @param {string} src
  * @param {number} edg 角度
@@ -366,135 +547,3 @@ export function rotateBase64Img(src, edg, callback) {
     callback(canvas.toDataURL())
   }
 }
-
-/**
- * @param {HTMLElement} element
- * @param {string} className
- */
-export function toggleClass(element, className) {
-  if (!element || !className) {
-    return
-  }
-  let classString = element.className
-  const nameIndex = classString.indexOf(className)
-  if (nameIndex === -1) {
-    classString += '' + className
-  } else {
-    classString =
-      classString.substr(0, nameIndex) +
-      classString.substr(nameIndex + className.length)
-  }
-  element.className = classString
-}
-
-/**
- * @param {Function} func
- * @param {number} wait
- * @param {boolean} immediate
- * @return {*}
- */
-export function debounce(func, wait, immediate) {
-  let timeout, args, context, timestamp, result
-
-  const later = function() {
-    // 据上一次触发时间间隔
-    const last = +new Date() - timestamp
-
-    // 上次被包装函数被调用时间间隔 last 小于设定时间间隔 wait
-    if (last < wait && last > 0) {
-      timeout = setTimeout(later, wait - last)
-    } else {
-      timeout = null
-      // 如果设定为immediate===true，因为开始边界已经调用过了此处无需调用
-      if (!immediate) {
-        result = func.apply(context, args)
-        if (!timeout) context = args = null
-      }
-    }
-  }
-
-  return function(...args) {
-    context = this
-    timestamp = +new Date()
-    const callNow = immediate && !timeout
-    // 如果延时不存在，重新设定延时
-    if (!timeout) timeout = setTimeout(later, wait)
-    if (callNow) {
-      result = func.apply(context, args)
-      context = args = null
-    }
-
-    return result
-  }
-}
-
-/**
- * This is just a simple version of deep copy
- * Has a lot of edge cases bug
- * If you want to use a perfect deep copy, use lodash's _.cloneDeep
- * @param {Object} source
- * @returns {Object}
- */
-export function deepClone(source) {
-  if (!source && typeof source !== 'object') {
-    throw new Error('error arguments', 'deepClone')
-  }
-  const targetObj = source.constructor === Array ? [] : {}
-  Object.keys(source).forEach(keys => {
-    if (source[keys] && typeof source[keys] === 'object') {
-      targetObj[keys] = deepClone(source[keys])
-    } else {
-      targetObj[keys] = source[keys]
-    }
-  })
-  return targetObj
-}
-
-/**
- * @param {Array} arr
- * @returns {Array}
- */
-export function uniqueArr(arr) {
-  return Array.from(new Set(arr))
-}
-
-/**
- * @returns {string}
- */
-export function createUniqueString() {
-  const timestamp = +new Date() + ''
-  const randomNum = parseInt((1 + Math.random()) * 65536) + ''
-  return (+(randomNum + timestamp)).toString(32)
-}
-
-/**
- * Check if an element has a class
- * @param {HTMLElement} elm
- * @param {string} cls
- * @returns {boolean}
- */
-export function hasClass(ele, cls) {
-  return !!ele.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'))
-}
-
-/**
- * Add class to element
- * @param {HTMLElement} elm
- * @param {string} cls
- */
-export function addClass(ele, cls) {
-  if (!hasClass(ele, cls)) ele.className += ' ' + cls
-}
-
-/**
- * Remove class from element
- * @param {HTMLElement} elm
- * @param {string} cls
- */
-export function removeClass(ele, cls) {
-  if (hasClass(ele, cls)) {
-    const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
-    ele.className = ele.className.replace(reg, ' ')
-  }
-}
-

@@ -2,7 +2,7 @@
 const path = require('path')
 const settings = require('./src/settings.js')
 
-const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin')
+// const SpeedMeasureWebpackPlugin = require('speed-measure-webpack-plugin')
 const CompressionPlugin = require('compression-webpack-plugin')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
 
@@ -61,12 +61,12 @@ module.exports = {
   },
   chainWebpack(config) {
     // 测量webpack构建速度
-    config
-      .when(process.env.NODE_ENV !== 'development',
-        config => {
-          config.plugin('speed')
-            .use(SpeedMeasureWebpackPlugin)
-        })
+    // config
+    //   .when(process.env.NODE_ENV !== 'development',
+    //     config => {
+    //       config.plugin('speed')
+    //         .use(SpeedMeasureWebpackPlugin)
+    //     })
     // it can improve the speed of the first screen, it is recommended to turn on preload
     config.plugin('preload').tap(() => [
       {
@@ -119,7 +119,7 @@ module.exports = {
             .plugin('ScriptExtHtmlWebpackPlugin')
             .after('html')
             .use('script-ext-html-webpack-plugin', [{
-            // `runtime` must same as runtimeChunk name. default is `runtime`
+              // `runtime` must same as runtimeChunk name. default is `runtime`
               inline: /runtime\..*\.js$/
             }])
             .end()
@@ -131,12 +131,21 @@ module.exports = {
                   name: 'chunk-libs',
                   test: /[\\/]node_modules[\\/]/,
                   priority: 10,
+                  maxInitialRequests: 5,
+                  maxSize: 450 * 1024,
+                  reuseExistingChunk: true,
                   chunks: 'initial' // only package third parties that are initially dependent
                 },
                 elementUI: {
                   name: 'chunk-elementUI', // split elementUI into a single package
-                  priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
-                  test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
+                  test: /[\\/]node_modules[\\/]_?element-ui(.*)/, // in order to adapt to cnpm
+                  maxSize: 300 * 1024,
+                  priority: 20
+                },
+                icons: {
+                  name: 'chunk-icons',
+                  test: resolve('src/icons'),
+                  priority: 40
                 },
                 commons: {
                   name: 'chunk-commons',

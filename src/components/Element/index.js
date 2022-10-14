@@ -1,6 +1,5 @@
 import Vue from 'vue'
-import upperFirst from 'lodash/upperFirst'
-import camelCase from 'lodash/camelCase'
+import { upperFirst, camelCase } from '@/utils'
 
 const requireComponent = require.context(
   // 其组件目录的相对路径

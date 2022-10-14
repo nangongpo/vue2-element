@@ -1,16 +1,15 @@
 <script>
 /* eslint-disable no-unused-vars */
-import RenderLabel from './render-label'
-import RenderValue from './render-value'
+import RenderLabel from './render-label.vue'
+import RenderValue from './render-value.vue'
+import { renderError, isValidValue } from '@/utils'
 
 import {
-  isValidValue,
   numberToPx,
   getFormItemWidth,
   getDefaultModel,
   getDefaultRules,
-  getSubmitFields,
-  renderError
+  getSubmitFields
 } from './utils'
 
 export { getDefaultModel, getSubmitFields, getDefaultRules }
@@ -60,22 +59,41 @@ export default {
       default: 'is_valid'
     }
   },
+  renderError,
   render(h, context) {
     const { props, data, scopedSlots } = context
     const { fields, model, rules, patterns, labelWidth, labelSuffix } = props
 
-    // 添加自定义方法
-    // 获取提交数据： this.$refs[formName].$vnode.data.getSubmitFields(model)
-    data['getSubmitFields'] = (m) => getSubmitFields(fields, m)
     const newRules = {}
     // const newModel = fields.reduce((t, v) => model[v.prop] ? { ...t, [v.prop]: model[v.prop] } : { ...t }, {})
     const getContent = fields.reduce((acc, item, index) => {
-      const { label, prop, prop_class, prop_type, label_width, value_width, display = true, null_value_display = true, required = false, placeholder, other_attrs = {}, ...newItem } = item
+      const { label, label_class, prop, prop_height, prop_class, prop_type, label_width, value_width, display = true, null_value_display = true, required = false, placeholder, other_attrs = {}, ...newItem } = item
       // 显示的表单项
       const isDisplay = null_value_display ? display : isValidValue(model[prop])
       // 不显示表单项跳过
       if (!isDisplay) {
         return acc
+      }
+      const formItemWidth = getFormItemWidth(item, model)
+      // prop为空时，清空labelSuffix
+      const newLabelSuffix = prop ? labelSuffix : ''
+      // render无效时
+      if (!item.render) {
+        return [
+          ...acc,
+          <div
+            class={['el-form-item', 'el-form-item--mini', prop_class]}
+            style={{ width: `${formItemWidth}`, height: numberToPx(prop_height) }}>
+            {
+              label && <label class={['el-form-item__label', label_class]} style={{ width: numberToPx(label_width || labelWidth) }}>
+                {label}{ newLabelSuffix }
+              </label>
+            }
+            {
+              model[item.prop] && <div class='el-form-item__content'>{ model[item.prop] }</div>
+            }
+          </div>
+        ]
       }
 
       // 构造校验规则
@@ -89,18 +107,15 @@ export default {
         }
         newRules[prop] = patterns[prop] ? [requiredRule, patterns[prop]] : [requiredRule]
       }
-      const formItemWidth = getFormItemWidth(item, model)
-      // prop为空时，清空labelSuffix
-      const newLabelSuffix = prop ? labelSuffix : ''
       const tmpNodes = <el-form-item
         prop={prop}
         label-width={numberToPx(label_width) || labelWidth}
         attrs={other_attrs}
         key={index}
         class={prop_class}
-        style={{ width: `${formItemWidth}` }}>
+        style={{ width: `${formItemWidth}`, height: numberToPx(prop_height) }}>
         <template slot='label'>
-          <RenderLabel label={label} label-suffix={newLabelSuffix} />
+          <RenderLabel label={label} labelClass={label_class} label-suffix={newLabelSuffix} />
         </template>
         <template slot='default'>
           <RenderValue config={item} item={newItem} parent={context} />
@@ -122,7 +137,6 @@ export default {
         </el-form-item>
       }
     </el-form>
-  },
-  renderError
+  }
 }
 </script>

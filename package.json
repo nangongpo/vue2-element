@@ -15,18 +15,17 @@
     "inspect": "vue-cli-service inspect"
   },
   "dependencies": {
-    "axios": "^0.27.2",
+    "axios": "0.21.4",
     "clipboard": "^2.0.11",
     "core-js": "^3.6.5",
     "crypto-js": "^4.1.1",
     "dayjs": "^1.11.0",
     "echarts": "4.1.0",
-    "element-ui": "^2.15.8",
+    "element-ui": "^2.15.10",
     "file-saver": "^2.0.5",
     "fuse.js": "3.4.4",
     "js-cookie": "2.2.0",
     "jsbarcode2": "^3.9.3",
-    "lodash": "^4.17.21",
     "nanoid": "^3.3.1",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
@@ -35,7 +34,7 @@
     "screenfull": "4.2.0",
     "sign-canvas": "^1.1.4",
     "three": "^0.137.5",
-    "vue": "^2.6.14",
+    "vue": "2.6.14",
     "vue-count-to": "^1.0.13",
     "vue-router": "^3.2.0",
     "vue-splitpane": "^1.0.6",
@@ -54,7 +53,6 @@
     "babel-eslint": "^10.1.0",
     "babel-plugin-component": "^1.1.1",
     "babel-plugin-equire": "^1.1.1",
-    "babel-plugin-lodash": "^3.3.4",
     "compression-webpack-plugin": "^6",
     "connect": "^3.7.0",
     "eslint": "^6.7.2",
@@ -68,6 +66,6 @@
     "svg-sprite-loader": "^6.0.11",
     "svgo": "^1",
     "tasksfile": "^5.1.1",
-    "vue-template-compiler": "^2.6.14"
+    "vue-template-compiler": "2.6.14"
   }
 }
