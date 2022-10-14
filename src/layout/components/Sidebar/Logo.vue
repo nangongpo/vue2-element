@@ -47,7 +47,7 @@ export default {
 
 .sidebar-logo-container {
   width: 100%;
-  height: $sidebarTitleHeight;
+  height: $pageTitleHeight;
   text-align: center;
 
   & .sidebar-logo-link {

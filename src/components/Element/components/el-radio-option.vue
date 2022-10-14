@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable no-unused-vars */
 export default {
   functional: true,
   props: {
@@ -24,7 +23,7 @@ export default {
     const { data, props } = context
     const { options = [], defaultProps } = props
 
-    return <el-radio-group { ...data} value-key={defaultProps.value} >
+    return <el-radio-group { ...data }>
       {
         options.map((item, index) => {
           return <el-radio
@@ -39,7 +38,4 @@ export default {
     </el-radio-group>
   }
 }
-
 </script>
-<style lang="scss">
-</style>

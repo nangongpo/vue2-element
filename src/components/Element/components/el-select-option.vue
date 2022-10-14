@@ -10,6 +10,8 @@ export default {
         return []
       }
     },
+    showOptionHeader: Boolean, // 显示”全选|全不选“
+    showOptionValue: Boolean, // 显示映射值
     multiple: Boolean,
     filterMethod: Function,
     defaultProps: { // 映射关系对应键名称
@@ -40,14 +42,21 @@ export default {
     }
   },
   methods: {
-    filterOptions(val) {
-      const { options, defaultProps, maxlength } = this
-      if (!val) {
-        // console.log(options)
-        this.newOptions = options.slice(0, maxlength)
-        return
+    filterOptions(query) {
+      const { showOptionValue, options, defaultProps, maxlength } = this
+
+      let newOptions = options
+      if (query) {
+        const _query = query.toLowerCase()
+        const filterItem = (item) => {
+          const label = item[defaultProps.label]?.toLowerCase()
+          const value = item[defaultProps.value]?.toLowerCase()
+          return showOptionValue ? (value.indexOf(_query) > -1 || label.indexOf(_query) > -1) : label.indexOf(_query) > -1
+        }
+        newOptions = options.filter(item => filterItem(item))
       }
-      this.newOptions = options.filter(v => v[defaultProps.label].indexOf(val) > -1).slice(0, maxlength)
+
+      this.newOptions = newOptions.slice(0, maxlength)
     },
     updateOptionsByValue(value) {
       const { multiple, options, maxlength, defaultProps } = this
@@ -75,15 +84,16 @@ export default {
       this.$emit('input', newValue)
     },
     getOptionHeader() {
-      const { onMultiple } = this
-      return <li class='el-select-dropdown__header' key='option-header'>
+      const { showOptionHeader, multiple, onMultiple } = this
+
+      return showOptionHeader && multiple && <li class='el-select-dropdown__header' key='option-header'>
         <el-button size='middle' type='text' icon='el-icon-check' onClick={() => onMultiple(true)}>全选</el-button>
         <el-button size='middle' type='text' icon='el-icon-close' onClick={() => onMultiple(false)}>全不选</el-button>
       </li>
     }
   },
   render(h, context) {
-    const { value, multiple, filterMethod, defaultProps, newOptions, filterOptions, getOptionHeader, $attrs, $listeners, updateOptionsByValue } = this
+    const { value, multiple, filterMethod, defaultProps, showOptionValue, newOptions, filterOptions, getOptionHeader, $attrs, $listeners, updateOptionsByValue } = this
 
     const { focus, ...restListeners } = $listeners
     // 计算选项的最小宽度
@@ -93,8 +103,6 @@ export default {
     }, 0)
 
     const scopedSlots = this.$slots || {}
-    const optionSlot = scopedSlots.option
-    scopedSlots.option = undefined
 
     const onFocus = (event) => {
       updateOptionsByValue(value)
@@ -109,16 +117,33 @@ export default {
       onFocus={onFocus}
       on={restListeners}
     >
-      { multiple && getOptionHeader() }
+      { getOptionHeader() }
       {
         newOptions.map((item, index) => {
+          const newItem = {
+            key: index,
+            label: item[defaultProps.label],
+            value: item[defaultProps.value],
+            disabled: item[defaultProps.disabled],
+            style: { minWidth: `${minWidth}px` }
+          }
+          if (showOptionValue) {
+            return <el-option
+              key={newItem.key}
+              label={newItem.label}
+              value={newItem.value}
+              disabled={newItem.disabled}
+              style={newItem.style}>
+              <span style='float: left'>{ newItem.label }</span>
+              <span style='float: right; color: #8492a6; font-size: 13px'>{ newItem.value }</span>
+            </el-option>
+          }
           return <el-option
-            key={index}
-            label={item[defaultProps.label]}
-            value={item[defaultProps.value]}
-            disabled={item[defaultProps.disabled]}
-            style={{ minWidth: `${minWidth}px` }}>
-            { optionSlot && optionSlot({ label: item[defaultProps.label], value: item[defaultProps.value] })}
+            key={newItem.key}
+            label={newItem.label}
+            value={newItem.value}
+            disabled={newItem.disabled}
+            style={newItem.style}>
           </el-option>
         })
       }

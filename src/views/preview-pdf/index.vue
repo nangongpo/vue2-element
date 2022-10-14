@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import VuePdf from '@/components/VuePdf'
+import VuePdf from '@/components/VuePdf/index.vue'
 import { getLocalFile } from '@/api/file'
 
 export default {

@@ -7,6 +7,7 @@ export default {
     value: [String, Array, File],
     httpRequest: Function, // return promise
     disabled: Boolean,
+    accept: String,
     action: {
       type: String,
       default: '#'
@@ -75,10 +76,11 @@ export default {
     }
   },
   render(h) {
-    const { action, limit, multiple, drag, tooltip, handleUpload, handleRemove, onPreview } = this
+    const { accept, action, limit, multiple, drag, tooltip, handleUpload, handleRemove, onPreview } = this
     const showButton = !drag
     const data = {
       props: {
+        accept,
         action,
         multiple,
         drag,
@@ -94,7 +96,7 @@ export default {
     return <el-upload ref='upload' {...data}>
       {
         showButton
-          ? <el-button size='small' type='primary'>点击上传</el-button>
+          ? <el-button size='mini' type='primary'>点击上传</el-button>
           : <span>
             <i class='el-icon-upload'></i>
             <div class='el-upload__text'>将文件拖到此处，或<em>点击上传</em></div>
@@ -106,15 +108,3 @@ export default {
 }
 
 </script>
-<style lang="scss" scoped>
-// .el-upload-file {
-//   .el-upload__tip {
-//     padding-left: 4px;
-//   }
-//   &.drag {
-//     .el-upload__tip {
-//       display: block;
-//     }
-//   }
-// }
-</style>

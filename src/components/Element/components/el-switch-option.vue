@@ -1,4 +1,19 @@
 <script>
+import ElSwitch from 'element-ui/packages/switch/index'
+const MySwitch = {
+  extends: ElSwitch,
+  props: {
+    activeValue: {
+      type: [String, Boolean, Number],
+      default: ''
+    },
+    inactiveValue: {
+      type: [String, Boolean, Number],
+      default: ''
+    }
+  }
+}
+
 export default {
   functional: true,
   props: {
@@ -14,17 +29,13 @@ export default {
     const { options } = props
     const [active = {}, inactive = {}] = options
 
-    return <el-switch
+    return <MySwitch
       { ...data }
       active-text={active.label}
       inactive-text={inactive.label}
       active-value={active.value}
       inactive-value={inactive.value}>
-    </el-switch>
+    </MySwitch>
   }
 }
-
 </script>
-<style lang="scss" scoped>
-.wrapper { display: block; }
-</style>

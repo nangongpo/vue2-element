@@ -101,14 +101,14 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import Search from '@/components/HeaderSearch'
-import BaseForm from '@/components/BaseForm'
-import RenderJsx from '@/components/RenderJsx'
+import Breadcrumb from '@/components/Breadcrumb/index.vue'
+import Hamburger from '@/components/Hamburger/index.vue'
+import ErrorLog from '@/components/ErrorLog/index.vue'
+import Screenfull from '@/components/Screenfull/index.vue'
+import SizeSelect from '@/components/SizeSelect/index.vue'
+import Search from '@/components/HeaderSearch/index.vue'
+import BaseForm from '@/components/BaseForm/index.vue'
+import RenderJsx from '@/components/RenderJsx/index.vue'
 import { countDown } from '@/utils'
 import { axiosPost } from '@/api'
 

@@ -65,7 +65,7 @@
 
 <script>
 import allConfig from './data'
-import MyForm from '@/components/MyForm'
+import MyForm from '@/components/MyForm/index.vue'
 export default {
   components: { MyForm },
   data() {

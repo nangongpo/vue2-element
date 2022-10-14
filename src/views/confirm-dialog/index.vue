@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import ConfirmModal from '@/components/ConfirmModal'
+import ConfirmModal from '@/components/ConfirmModal/index.vue'
 
 export default {
   components: { ConfirmModal },

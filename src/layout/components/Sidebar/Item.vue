@@ -1,5 +1,5 @@
 <script>
-import RenderIcon from '@/components/RenderIcon'
+import RenderIcon from '@/components/RenderIcon/index.vue'
 
 export default {
   name: 'MenuItem',

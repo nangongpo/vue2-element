@@ -21,20 +21,15 @@ $font-color: #333333;
 $default-border-radius: 6px;
 $default-border-color: #e6e6e6;
 
-// header
-$headerHeight: 50px;
-
 // main
 $mainBg: $gray;
 
+// header
+$headerHeight: 50px;
+// pageTitle
+$pageTitleHeight: 126px;
+
 // sidebar
-$sidebarTitleHeight: 150px;
-
-$sideBarWidth: 240px;
-$sideBarMinWidth: 40px;
-
-$menuHeight: 44px;
-
 $menuText:#fff;
 $menuActiveText:#fff;
 $subMenuActiveText:#fff; // https://github.com/ElemeFE/element/issues/12951
@@ -47,6 +42,10 @@ $subMenuHover:#0A2D65;
 
 $menuActiveBg: #055EA3;
 $menuLineBg: #008DFC;
+$menuHeight: 44px;
+
+$sideBarWidth: 240px;
+$sideBarMinWidth: 54px;
 
 
 // table

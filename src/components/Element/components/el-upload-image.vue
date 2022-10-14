@@ -213,5 +213,4 @@ export default {
   border: none;
   border-radius: inherit;
 }
-
 </style>
