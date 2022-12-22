@@ -154,5 +154,35 @@
     "placeholder": "只能上传excel文件，且不超过500kb",
     "null_value_display": true,
     "options": null
+	},
+  {
+		"label": "读取身份证",
+		"prop": "card",
+		"prop_type": "string",
+    "prop_width": 0,
+    "order": 12,
+    "display": true,
+		"required": false,
+    "editable": true,
+		"clearable": false,
+		"render": "input-altimeter",
+    "placeholder": null,
+    "null_value_display": true,
+    "options": null
+	},
+  {
+		"label": "拍摄",
+		"prop": "card",
+		"prop_type": "string",
+    "prop_width": 0,
+    "order": 12,
+    "display": true,
+		"required": false,
+    "editable": true,
+		"clearable": false,
+		"render": "upload-altimeter",
+    "placeholder": null,
+    "null_value_display": true,
+    "options": null
 	}
 ]

@@ -14,6 +14,18 @@
         v-bind="attrs"
       />
     </template>
+    <template #input-altimeter="{ prop, attrs }">
+      <el-input-altimeter
+        v-model="model[prop]"
+        v-bind="attrs"
+      />
+    </template>
+    <template #upload-altimeter="{ prop, attrs }">
+      <el-upload-altimeter
+        v-model="model[prop]"
+        v-bind="attrs"
+      />
+    </template>
     <template #select="{ prop, attrs }">
       <el-select-option
         v-model="model[prop]"

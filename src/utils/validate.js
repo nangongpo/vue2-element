@@ -81,3 +81,22 @@ export function isArray(arg) {
   }
   return Array.isArray(arg)
 }
+
+/**
+ * @param {String} arg
+ * @return {String}
+ */
+
+export function fileType(arg) {
+  if (/\.(gif|jpg|jpeg|png|GIF|JPG|PNG)$/.test(arg)) {
+    return 'image'
+  } else if (/\.(pdf|PDF)$/.test(arg)) {
+    return 'pdf'
+  } else if (/\.(xlsx|xls|csv)$/.test(arg)) {
+    return 'excel'
+  } else if (/\.(doc|docx)$/.test(arg)) {
+    return 'word'
+  } else {
+    return 'other'
+  }
+}
