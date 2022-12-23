@@ -254,6 +254,18 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: '/print',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/print/index'),
+        name: 'print',
+        meta: { title: '打印', icon: 'icon', noCache: true }
+      }
+    ]
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
