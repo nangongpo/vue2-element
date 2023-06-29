@@ -323,3 +323,90 @@ function addExcelStyle(dataInfo, params = {}) {
     }
   }
 }
+
+
+
+export function export_table_to_excel2(header = [], data = [], dataname) {
+  // let re = /http/ // 字符串中包含http,则默认为图片地址
+  const isImage = (res) => /^(http|data:image\/)/.test(res)
+  let width = 60 // 设置图片大小
+  let height = 60
+
+  // 添加表头信息
+  let thead = '<thead><tr>'
+  for (let i = 0; i < header.length; i++) {
+    thead += '<th>' + (header[i] || '') + '</th>'
+  }
+  thead += '</tr></thead>'
+
+  // 添加每一行数据
+  let tbody = '<tbody>'
+  for (let i = 0; i < data.length; i++) {
+    tbody += '<tr>'
+    const row = data[i] // 获取每一行数据
+
+    for (let key in row) {
+      if (isImage(row[key])) {
+        // 如果为图片，则需要加div包住图片
+        tbody +=
+          '<td style="width:' +
+          width +
+          'px; height:' +
+          height +
+          'px; text-align: center; vertical-align: middle"><div style="display:inline"><img src=\'' +
+          row[key] +
+          "' " +
+          ' ' +
+          'width=' +
+          '"' +
+          width +
+          '"' +
+          ' ' +
+          'height=' +
+          '"' +
+          height +
+          '"' +
+          '></div></td>'
+      } else {
+        tbody += '<td style="text-align:center">' + row[key] + '</td>'
+      }
+    }
+    tbody += '</tr>'
+  }
+  tbody += '</tbody>'
+
+  let table = thead + tbody
+
+  // 导出表格
+  exportToExcel(table, dataname)
+}
+
+// 该方法不兼容IE, chrome49测试通过 参考： https://juejin.cn/post/7090710514820612103
+function exportToExcel(table, filename = '下载') {
+  // const uri = 'data:application/vnd.ms-excel;base64,'
+  const template =
+      '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+      'xmlns:x="urn:schemas-microsoft-com:office:excel" ' +
+      'xmlns="http://www.w3.org/TR/REC-html40"><head>' +
+      '<!--[if gte mso 9]><xml><x:ExcelWorkbook>' +
+      '<x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}' +
+      '</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>' +
+      '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml>' +
+      '<![endif]--></head><body><table>{table}</table></body></html>'
+  const format = function (s, c) {
+    return s.replace(/{(\w+)}/g, function (m, p) {
+      return c[p]
+    })
+  }
+
+  // const base64 = (str) => window.btoa(unescape(encodeURIComponent(str)))
+  const ctx = { worksheet: 'Sheet', table }
+
+  //创建下载
+  const link = document.createElement('a')
+  const blob = new Blob([format(template, ctx)], {type: "application/vnd.ms-excel"})
+  // link.setAttribute('href', uri + base64(format(template, ctx)))
+  link.setAttribute('href', URL.createObjectURL(blob))
+  link.setAttribute('download', filename)
+  link.click()
+}

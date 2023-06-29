@@ -1,15 +1,12 @@
 <script>
-/* eslint-disable no-unused-vars */
 import { PlTable, PlTableColumn } from 'pl-table'
 import RenderHeader from './render-header.vue'
 import RenderCell from './render-cell.vue'
 
-import { renderError } from '@/utils'
-import { numberToPx, getTableFieldData, getTableFieldByTableData } from './utils'
+import { renderError, numberToPx } from '@/utils'
+import { isNormalColumn } from './utils'
 
 import './pl-table.css'
-
-export { getTableFieldData, getTableFieldByTableData }
 
 // 暂存配置
 const cacheConfig = {}
@@ -38,10 +35,16 @@ export default {
         return {}
       }
     },
+    border: {
+      type: Boolean,
+      default: false
+    },
     stripe: {
       type: Boolean,
       default: true
     },
+    paginationBackground: Boolean, // 分页条开启背景
+    paginationCenter: Boolean, // 分页条是否居中
     pageSize: {
       type: Number,
       default: 50
@@ -51,12 +54,16 @@ export default {
       default() {
         return [10, 20, 50, 100, 200]
       }
+    },
+    defaultValue: {
+      type: String,
+      default: '—'
     }
   },
   renderError,
   render(h, context) {
     const { data, props, scopedSlots } = context
-    const { height, paginationShow, fields, actionAttrs, stripe, pageSize, pageSizes } = props
+    const { height, fields, actionAttrs, border, stripe, paginationBackground, paginationCenter, pageSize, pageSizes } = props
 
     // 将pageSize添加到pageSizes中
     let newPageSizes = pageSizes
@@ -68,9 +75,8 @@ export default {
       newPageSizes = cacheConfig['pageSizes'] || pageSizes
     }
 
-    const createTableColumn = (item, vprop) => {
-      const { table_type, other_attrs = {}, label, prop, prop_width, prop_min_width, editable, display = true, null_value_display = true, children = [], ...restItem } = item
-      item.vprop = vprop
+    const createTableColumn = (item) => {
+      const { table_type, other_attrs = {}, label, prop, prop_class, prop_overflow = false, prop_width, prop_min_width, display = true, children = [], ...restItem } = item
       // 不显示跳过
       if (!display) {
         return
@@ -78,8 +84,18 @@ export default {
       const newLabel = typeof (label) === 'string' ? label : undefined
       const tmpScopedSlots = {}
 
-      const needIgnoreColumn = ['selection', 'index', 'expand'].includes(table_type)
-      if (!needIgnoreColumn) {
+      const tableColumnAttrs = {
+        'type': table_type,
+        'prop': prop,
+        'label': newLabel,
+        'width': numberToPx(prop_width),
+        'min-width': numberToPx(prop_min_width),
+        'class-name': prop_class,
+        'show-overflow-tooltip': prop_overflow,
+        ...other_attrs
+      }
+
+      if (isNormalColumn(item)) {
         if (!newLabel) {
           tmpScopedSlots['header'] = (scope) => {
             return <RenderHeader scope={scope} label={label} />
@@ -95,18 +111,11 @@ export default {
         }
       }
 
-      const tmpNodes = <PlTableColumn
-        type={table_type}
-        prop={vprop}
-        label={newLabel}
-        width={numberToPx(prop_width)}
-        min-width={numberToPx(prop_min_width)}
-        attrs={other_attrs}
-        scopedSlots={tmpScopedSlots}>
+      const tmpNodes = <PlTableColumn attrs={tableColumnAttrs} scopedSlots={tmpScopedSlots}>
         {
-          children.length ? children.map((item) => {
-            return createTableColumn(item, `${vprop}.${item.prop}`)
-          }) : ''
+          Array.isArray(children) && children.map(v => {
+            return createTableColumn(v)
+          })
         }
       </PlTableColumn>
       return tmpNodes
@@ -125,18 +134,21 @@ export default {
 
     return <PlTable
       {...data}
+      border={border}
       stripe={stripe}
       page-size={pageSize}
       page-sizes={newPageSizes}
       style={{ height: numberToPx(height) }}
-      class='base-table'>
+      class={
+        ['base-table', { 'is-pagination-background': paginationBackground, 'is-pagination-center': paginationCenter }]
+      }>
       {
-        fields.reduce((acc, v) => {
+        fields.reduce((t, v) => {
           const tmpNodes = createTableColumn(v, v.prop)
           if (!tmpNodes) {
-            return acc
+            return t
           }
-          return [...acc, tmpNodes]
+          return [...t, tmpNodes]
         }, [])
       }
       {

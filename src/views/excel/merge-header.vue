@@ -44,7 +44,6 @@
         </template>
       </el-table-column>
     </el-table>
-
   </div>
 </template>
 
@@ -59,7 +58,8 @@ export default {
       list: null,
       listLoading: true,
       downloadLoading: false,
-      downloadLoading2: false
+      downloadLoading2: false,
+      downloadLoading3: false
     }
   },
   created() {
@@ -81,6 +81,7 @@ export default {
         this.listLoading = false
       })
     },
+    // data => excel
     handleDownload() {
       this.downloadLoading = true
       try {
@@ -110,6 +111,7 @@ export default {
         })
       }
     },
+    // table => excel
     handleDownload2() {
       this.downloadLoading2 = true
       try {

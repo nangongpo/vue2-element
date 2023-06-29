@@ -1,12 +1,14 @@
 import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
+import defaultOptions from '@/utils/options'
 
 const state = {
   firstLogin: false,
   token: getToken(),
   avatar: 'https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif',
   userInfo: {},
+  all_options: {},
   roles: []
 }
 
@@ -17,6 +19,20 @@ const mutations = {
   },
   SET_USER_INFO: (state, userInfo) => {
     state.userInfo = userInfo
+  },
+  SET_ALL_OPTIONS: (state, allOptions = {}) => {
+    // allOptions = { unit_type_map: [], user_status_map: [], ... }
+    const newOptions = {}
+    for (const key in allOptions) {
+      // 字段属性重命名
+      const [property] = key.split('_map')
+      if (Array.isArray(allOptions[key])) {
+        newOptions[property] = allOptions[key]
+      } else {
+        console.error(`${key} farmat error， like [{ label: '否', value: '0' }]`)
+      }
+    }
+    state.all_options = { ...defaultOptions, ...newOptions }
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
@@ -49,7 +65,8 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles } = data
+        const { user_info, ...options } = data
+        const { roles } = user_info
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -57,8 +74,9 @@ const actions = {
         }
 
         commit('SET_ROLES', roles)
-        commit('SET_USER_INFO', data)
-        resolve(data)
+        commit('SET_USER_INFO', user_info)
+        commit('SET_ALL_OPTIONS', options)
+        resolve(user_info)
       }).catch(error => {
         reject(error)
       })

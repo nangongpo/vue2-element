@@ -25,6 +25,18 @@ const users = {
   }
 }
 
+const all_options = {
+  user_status: [
+    { label: '正常', value: '1' },
+    { label: '停用', value: '2' }
+  ],
+  data_permission: [
+    { label: '全部', value: '1' },
+    { label: '本单位', value: '2' },
+    { label: '个人', value: '3' }
+  ]
+}
+
 module.exports = [
   // user login
   {
@@ -55,10 +67,10 @@ module.exports = [
     type: 'get',
     response: config => {
       const { token } = config.query
-      const info = users[token]
+      const user_info = users[token]
 
       // mock error
-      if (!info) {
+      if (!user_info) {
         return {
           code: 50008,
           message: 'Login failed, unable to get user details.'
@@ -67,7 +79,10 @@ module.exports = [
 
       return {
         code: 20000,
-        data: info
+        data: {
+          user_info,
+          ...all_options
+        }
       }
     }
   },

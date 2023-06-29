@@ -1,52 +1,26 @@
-import { isValidValue } from '@/utils'
+import { getLabelByOptions } from '@/utils'
 
-export function getLabelByOptions(prop, value, options) {
-  // 转义列表
-  const defaultValue = '-'
-  if (!prop) return
-  if (!Array.isArray(options)) return isValidValue(value) ? value : defaultValue
-  const getLabel = (arr, value) => {
-    if (!Array.isArray(value)) {
-      return arr.reduce((t, v) => {
-        const hasValue = v.value === value
-        if (hasValue) {
-          return v.label
-        }
-        if (Array.isArray(v.children) && !!v.children.length) {
-          return getLabel(v.children, value) || t
-        }
-        return t
-      }, value)
-    } else {
-      return value.reduce((t, v) => {
-        const val = arr.find(item => item.value === v)
-        return val ? [...t, val.label] : t
-      }, []).join(',')
-    }
-  }
-  const newValue = getLabel(options, value)
-  return isValidValue(newValue) ? newValue : defaultValue
-}
+// 构造单元格渲染值
+export function getTableColumnValue(item = {}, row = {}, parent = {}) {
+  const { props = {}, defaultValue = '—' } = parent
+  const { allOptions = {}} = props
+  const { prop, formatValue, options, formatOptions } = item
+  const curOptions = options || (formatOptions ? formatOptions(allOptions, row) : allOptions[prop])
 
-// 数字转px
-export function numberToPx(num = 0) {
-  if (typeof (num) !== 'number') return num
-  let n
-  switch (num) {
-    case 0:
-      n = undefined
-      break
-    case 1:
-      n = '100%'
-      break
-    default:
-      if (num > 0 && num < 1) {
-        n = `${num * 100}%`
-      } else {
-        n = `${num}px`
-      }
+  const value = row[prop]
+  let cellValue = value
+
+  // 有转义函数
+  if (formatValue) {
+    cellValue = formatValue(item, row, curOptions)
   }
-  return n
+
+  // 有映射，需要转义
+  if (curOptions) {
+    cellValue = getLabelByOptions(value, curOptions) || defaultValue
+  }
+
+  return { value, cellValue, options: curOptions, defaultValue }
 }
 
 // 获取组件基础属性
@@ -73,6 +47,11 @@ export function getTextNode(vNode = {}) {
   }
 }
 
+// 判断字段列表
+export function isNormalColumn(v) {
+  return !!v.prop && !['selection', 'index', 'expand'].includes(v.table_type)
+}
+
 // 获取表格参数配置列表 [{ name: '我的', // 表示字段名 state: true, // 表示选择状态 disabled: true // 表示是否禁用 }]
 export function getTableFieldData(h, fields = []) {
   const newFields = fields.map(item => {
@@ -95,27 +74,50 @@ export function getTableFieldByTableData(tableData = [], config = {}) {
     return v[prop] ? [...t, { prop, name: typeof (label) === 'function' ? label(v) : (v[label] || v[prop]), state: true, disabled: false, config: v }] : t
   }, [])
 }
+
 // 根据指定字段处理导出的数据
-export function excel_data_format(tableFields = [], tableData = [], allOptions, checkedField = []) {
-  let fieldMap = tableFields
-  if (checkedField.length) {
-    fieldMap = checkedField.map((item) => {
-      return tableFields.find((obj) => obj.prop === item)
-    })
-  } else {
-    fieldMap = tableFields.reduce((t, v) => v.prop !== 'index' ? [...t, v] : t, [])
+export async function excel_data_format(tableFields = [], tableData = [], allOptions, checkedField = []) {
+  console.time('excel_data_format')
+  const fieldMap = checkedField.length > 0
+    ? tableFields.filter(v => checkedField.includes(v.prop))
+    : tableFields.filter(v => isNormalColumn(v))
+
+  // 构造excel字段
+  const header = []; const excelFieldsMap = {}; const data = []; const cacheOptionMap = {}
+  for (let i = 0; i < fieldMap.length; i++) {
+    const item = fieldMap[i]
+    const { prop, formatOptions } = item
+    item['options'] = formatOptions ? formatOptions(allOptions, item.options) : item.options || allOptions[prop]
+    excelFieldsMap[prop] = item
+    header.push(item.label)
   }
-  const data = tableData.reduce((t, v) => {
-    const row = fieldMap.reduce((oldVal, config) => {
-      const { prop, formatValue, formatOptions } = config
-      const options = formatOptions ? formatOptions(allOptions) : allOptions[prop]
-      const value = formatValue
-        ? formatValue(config, v, allOptions)
-        : getLabelByOptions(prop, v[prop], options)
-      return [...oldVal, value]
-    }, [])
-    return [...t, row]
-  }, [])
-  const header = fieldMap.reduce((t, v) => [...t, v.label], [])
-  return { data: data, header: header }
+
+  for (let i = 0; i < tableData.length; i++) {
+    const rowData = tableData[i]
+    const labels = []
+    for (let j = 0; j < fieldMap.length; j++) {
+      const key = fieldMap[j].prop
+      const { prop, options, formatValue } = excelFieldsMap[key]
+      if (options || formatValue) {
+        const value = rowData[prop]
+        const uuid = `${prop}-${value}`
+        let label = cacheOptionMap[uuid]
+        if (!label) {
+          if (formatValue) {
+            cacheOptionMap[uuid] = await formatValue(excelFieldsMap[key], value, allOptions)
+          }
+          if (options) {
+            cacheOptionMap[uuid] = getLabelByOptions(value, options)
+          }
+          label = cacheOptionMap[uuid]
+        }
+        labels.push(label)
+      } else {
+        labels.push(rowData[prop])
+      }
+    }
+    data.push(labels)
+  }
+  console.timeEnd('excel_data_format')
+  return { data, header }
 }

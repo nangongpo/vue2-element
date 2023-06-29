@@ -44,7 +44,7 @@ export default {
   methods: {
     pageInit() {
       // 防止页面刷新后将长链接断开之后不会重新连接
-      this.$store.dispatch('user/getMessage')
+      // this.$store.dispatch('user/getMessage')
     },
     captureOpen() {
       this.$store.commit('altimeter/SET_VISIBLE', true)

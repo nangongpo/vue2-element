@@ -1,25 +1,28 @@
-import { isValidValue, deepClone } from '@/utils'
+import { isValidValue, deepClone, getLabelByOptions } from '@/utils'
 
-export function getLabelByOptions(prop, value, options = []) {
-  const defaultValue = '-'
-  if (!prop) return
-  // 转义列表
-  if (!Array.isArray(options)) return value || defaultValue
+// 构造表单渲染值, 表单项配置中的options优先级高
+export function getFormItemValue(item = {}, model = {}, parent = {}) {
+  const { props = {}, defaultValue = '—' } = parent
+  const { propOverflow, allOptions = {}, filterOptionBy } = props
+  const { prop, prop_overflow, render, formatValue, options, formatOptions } = item
+  let curOptions = options || (formatOptions ? formatOptions(allOptions, model) : allOptions[prop])
 
-  const getLabel = (arr, value) => {
-    return arr.reduce((t, v) => {
-      const hasValue = v.value === value
-      if (hasValue) {
-        return v.label
-      }
-      if (Array.isArray(v.children) && !!v.children.length) {
-        return getLabel(v.children, value) || t
-      }
-      return t
-    }, '')
+  // 过滤选项无效值
+  if (Array.isArray(curOptions) && filterOptionBy) {
+    curOptions = curOptions.filter(v => Object.prototype.hasOwnProperty.call(v, filterOptionBy) ? v[filterOptionBy] : true)
+  }
+  let value = model[prop]
+  // 有转义函数
+  if (formatValue) {
+    value = formatValue(item, model, curOptions)
   }
 
-  return getLabel(options, value) || value || defaultValue
+  // 无render，需要转义
+  if (!render) {
+    value = getLabelByOptions(value, curOptions) || defaultValue
+  }
+
+  return { value, options: curOptions, propOverflow: prop_overflow || propOverflow, defaultValue }
 }
 
 // 获取组件基础属性
@@ -41,31 +44,17 @@ export function filterObjectNullValue(obj) {
   }, {})
 }
 
-// 数字转px
-export function numberToPx(num = 0) {
-  if (typeof (num) !== 'number') return num
-  let n
-  switch (num) {
-    case 0:
-      n = undefined
-      break
-    case 1:
-      n = '100%'
-      break
-    default:
-      if (num > 0 && num < 1) {
-        n = `${num * 100}%`
-      } else {
-        n = `${num}px`
-      }
-  }
-  return n
-}
-
-// prop_width = 0 不设置宽度、prop_width = 1 独占一行
-export function getFormItemWidth(item, model) {
-  const { render, prop, prop_width = 0, disabled } = item
+/**
+ * prop_width = 0 不设置宽度、prop_width = 1 独占一行
+ * @param {object} item 表单项配置
+ * @param {object} model 表单填充值
+ * @param {number|string} propWidth 组件传递的默认表单项宽度
+ * @returns {string}
+ */
+export function getFormItemWidth(item, model, propWidth = 0) {
+  const { render, prop, prop_width = propWidth, disabled } = item
   let itemWidth
+  if (typeof (prop_width) === 'string') return prop_width
 
   switch (prop_width) {
     case 0:
@@ -90,22 +79,32 @@ export function getFormItemWidth(item, model) {
   return itemWidth
 }
 
-// 初始化el-form的model
-export function getDefaultModel(fields = [], model = {}) {
-  const defaultModel = deepClone(model)
+/**
+ * 初始化el-form的model, 只保留fields中涉及的prop
+ * @param {array} fields 表单字段
+ * @param {object} model 表单对象
+ * @param {array} otherProps 扩充表单字段, 一般指接口需要的特殊字段
+ * @returns {object}
+ */
+export function getDefaultModel(fields = [], model = {}, otherProps = []) {
+  const defaultModel = otherProps.reduce((t, v) => {
+    return { ...t, [v]: model[v] }
+  }, {})
   const mapPropType = {
     string: '',
     array: []
   }
   const getDefaultValue = (item, model) => {
     const value = model[item.prop]
-    if (isValidValue(value)) {
-      return item.formatValue ? item.formatValue(item, model) : value
-    }
-    return mapPropType[item.prop_type]
+    return item.formatValue
+      ? item.formatValue(item, model)
+      : isValidValue(value)
+        ? value
+        : mapPropType[item.prop_type]
   }
   fields.map(item => {
-    if (Object.prototype.hasOwnProperty.call(item, 'prop_type')) {
+    // 表单项隐藏时清除当前值
+    if (item.prop && item.display !== false) {
       defaultModel[item.prop] = getDefaultValue(item, model)
     }
   })
@@ -131,10 +130,10 @@ export function getDefaultRules(fields, rules = {}) {
 
 /**
  * 格式化提交的参数, 通过读取配置项中的is_submit字段和检查有效值，过滤表单
- * @param {*} fields 表单字段
- * @param {*} model 表单对象
- * @param {*} otherModel 扩充表单对象
- * @returns
+ * @param {array} fields 表单字段
+ * @param {object} model 表单对象
+ * @param {object} otherModel 扩充表单对象
+ * @returns {object}
  */
 export function getSubmitFields(fields = [], model = {}, otherModel = {}) {
   const submitForm = deepClone(model)

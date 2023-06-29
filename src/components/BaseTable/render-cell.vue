@@ -1,6 +1,6 @@
 <script>
-import { renderError, isValidValue } from '@/utils'
-import { getLabelByOptions, getComponentAttrs } from './utils'
+import { renderError } from '@/utils'
+import { getTableColumnValue, getComponentAttrs } from './utils'
 
 export default {
   functional: true,
@@ -12,31 +12,21 @@ export default {
   },
   renderError,
   render(h, context) {
-    const { scope = {}, config = {}, item = {}, parent = {}} = context.props
-    const { allOptions } = parent.props
-    const { render, prop, formatValue, editable, vprop, formatOptions } = config
-    const valueList = vprop.split('.')
-    let value = valueList.reduce((t, v) => t && isValidValue(t[v]) ? t[v] : undefined, scope.row)
+    const { scope = {}, config = {}, item = {}, parent = {} } = context.props
+    const { render, prop, editable } = config
+    const { value, cellValue, options, defaultValue } = getTableColumnValue(config, scope.row, parent)
+
     scope['value'] = value
-    scope['cellProp'] = prop
-    scope['cellRender'] = render
-    scope['cellAttrs'] = getComponentAttrs({ ...item, disabled: !editable })
-    scope['cellConfig'] = config
-    scope['setValue'] = (newValue) => {
-      scope.row[prop] = newValue
-    }
-    const options = formatOptions ? formatOptions(allOptions) : allOptions[prop]
-    // 有转义函数
-    value = formatValue
-      ? formatValue(config, scope.row, allOptions)
-      : getLabelByOptions(prop, value, options)
-    scope['cellValue'] = value
+    scope['prop'] = prop
+    scope['attrs'] = getComponentAttrs({ ...item, options, disabled: !editable })
+    scope['config'] = config
+    scope['cellValue'] = cellValue
 
     if (typeof (render) === 'function') {
-      return render(h, scope)
+      return render(h, scope) || [defaultValue]
     }
 
-    return [value]
+    return [cellValue]
   }
 }
 </script>

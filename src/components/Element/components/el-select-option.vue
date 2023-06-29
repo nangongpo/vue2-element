@@ -1,9 +1,22 @@
 <script>
 /* eslint-disable no-unused-vars */
-import { byteLength } from '@/utils'
+import { byteLength, debounce, isValidValue } from '@/utils'
+
 export default {
   props: {
     value: [Array, String, Number],
+    placeholder: {
+      type: String,
+      default: '请选择'
+    },
+    multiple: Boolean, // 多选时强制显示所有选项
+    remote: Boolean,
+    filterMethod: Function,
+    remoteMethod: Function,
+    collapseTags: { // 多选时是否将选中值按文字的形式展示
+      type: Boolean,
+      default: true
+    },
     options: {
       type: Array,
       default() {
@@ -12,8 +25,15 @@ export default {
     },
     showOptionHeader: Boolean, // 显示”全选|全不选“
     showOptionValue: Boolean, // 显示映射值
-    multiple: Boolean,
-    filterMethod: Function,
+    showAllOption: Boolean, // 显示所有选项
+    maxlength: { // 可选项的个数
+      type: Number,
+      default: 20
+    },
+    optionMaxWidth: { // 选项的最大宽度
+      type: Number,
+      default: 600
+    },
     defaultProps: { // 映射关系对应键名称
       type: Object,
       default() {
@@ -23,65 +43,101 @@ export default {
           disabled: 'disabled'
         }
       }
-    },
-    maxlength: { // 多选
-      type: Number,
-      default: 100
     }
   },
   data() {
+    this.selectedOptions = []
+    this.otherOptions = []
+    this.selectedValue = []
     return {
-      newOptions: []
+      newOptions: [] // this.options.slice(0, this.maxlength)
+    }
+  },
+  computed: {
+    isRemote() {
+      return !this.showAllOption && this.options.length > this.maxlength
     }
   },
   watch: {
     value: {
-      handler: 'updateOptionsByValue',
+      handler: 'initOptions',
       deep: true,
       immediate: true
     }
   },
   methods: {
-    filterOptions(query) {
-      const { showOptionValue, options, defaultProps, maxlength } = this
-
-      let newOptions = options
-      if (query) {
-        const _query = query.toLowerCase()
-        const filterItem = (item) => {
-          const label = item[defaultProps.label]?.toLowerCase()
-          const value = item[defaultProps.value]?.toLowerCase()
-          return showOptionValue ? (value.indexOf(_query) > -1 || label.indexOf(_query) > -1) : label.indexOf(_query) > -1
+    initOptions(value) {
+      const { isRemote, options, formatItem, setOptions } = this
+      // 默认值为空时，强制清空已选项
+      if (isValidValue(value)) {
+        if (this.$refs.select) {
+          this.$refs.select.selectedLabel = ''
         }
-        newOptions = options.filter(item => filterItem(item))
+      }
+      // 选项过多时，获取默认值对应的选项，将其放到选项列表的最上方
+      if (isRemote) {
+        const values = Array.isArray(value) ? value : isValidValue(value) ? [value] : []
+        const selectedOptions = []
+        const otherOptions = []
+        options.map(v => {
+          const item = formatItem(v)
+          if (values.includes(item.value)) {
+            selectedOptions.push(item)
+          } else {
+            otherOptions.push(item)
+          }
+        })
+        this.selectedValue = values
+        this.selectedOptions = selectedOptions
+        this.otherOptions = otherOptions
+      } else {
+        this.selectedOptions = []
+        this.otherOptions = options
       }
 
-      this.newOptions = newOptions.slice(0, maxlength)
+      setOptions()
     },
-    updateOptionsByValue(value) {
-      const { multiple, options, maxlength, defaultProps } = this
-      if (multiple) {
-        this.newOptions = options
-        return
-      }
-      const newOptions = options.slice(0, maxlength)
-      if (!value) {
-        this.newOptions = newOptions
-        return
-      }
-
-      const otherOptions = options.slice(maxlength)
-      const hasOption = otherOptions.find(v => v[defaultProps.value] === value)
-
-      if (hasOption) {
-        newOptions[newOptions.length - 1] = hasOption
-      }
-      this.newOptions = newOptions
+    filterOptions(query) {
+      const { multiple, showOptionValue, options, selectedValue, otherOptions, setOptions, formatItem } = this
+      // 选项过多时，自动启动远程搜索, 显示所有选项(showAllOption=true)时，关闭远程搜索
+      debounce(() => {
+        let newOptions = []
+        if (query) {
+          const q = query.toLowerCase()
+          for (let i = 0; i < options.length; i++) {
+            const item = formatItem(options[i])
+            const label = item.label?.toLowerCase()
+            // 多选搜索时，排除已勾选的选项
+            if (multiple && selectedValue.includes(item.value)) {
+              continue
+            }
+            if (showOptionValue ? (String(item.value).toLowerCase().indexOf(q) > -1 || label.indexOf(q) > -1) : label.indexOf(q) > -1) {
+              newOptions.push(item)
+            }
+          }
+        } else {
+          newOptions = otherOptions
+        }
+        this.otherOptions = newOptions
+        setOptions()
+      }, 50)()
+    },
+    setOptions() {
+      const { isRemote, selectedOptions, otherOptions, maxlength } = this
+      this.newOptions = isRemote ? selectedOptions.concat(otherOptions.slice(0, maxlength)) : otherOptions
     },
     onMultiple(isCheckAll) {
-      const { defaultProps, newOptions } = this
-      const newValue = isCheckAll ? newOptions.map(v => v[defaultProps.value]) : []
+      const { newOptions, formatItem } = this
+      const newValue = isCheckAll ? newOptions.map(v => formatItem(v).value) : []
       this.$emit('input', newValue)
+    },
+    formatItem(item) {
+      const { defaultProps } = this
+      const _item = item
+      for (const key in defaultProps) {
+        _item[key] = item[defaultProps[key]]
+      }
+      return _item
     },
     getOptionHeader() {
       const { showOptionHeader, multiple, onMultiple } = this
@@ -92,59 +148,62 @@ export default {
       </li>
     }
   },
-  render(h, context) {
-    const { value, multiple, filterMethod, defaultProps, showOptionValue, newOptions, filterOptions, getOptionHeader, $attrs, $listeners, updateOptionsByValue } = this
+  render(h) {
+    const { value, placeholder, multiple, optionMaxWidth, isRemote, collapseTags, remoteMethod, filterMethod, showOptionValue, newOptions, filterOptions, getOptionHeader, $attrs, $listeners, initOptions } = this
 
     const { focus, ...restListeners } = $listeners
+
     // 计算选项的最小宽度
-    const minWidth = newOptions.reduce((t, v) => {
+    let optionMinWidth = newOptions.reduce((t, v) => {
       const len = byteLength(v.label) * 7
       return len > t ? len : t
     }, 0)
 
+    const showTooltip = optionMinWidth > optionMaxWidth
+
+    if (showTooltip) {
+      optionMinWidth = 0
+    }
+
     const scopedSlots = this.$slots || {}
 
-    const onFocus = (event) => {
-      updateOptionsByValue(value)
-      focus && focus(event)
+    const onFocus = (evt) => {
+      initOptions(value)
+      focus && focus(evt)
     }
 
     return <el-select
+      ref='select'
       value={value}
+      placeholder={placeholder}
       multiple={multiple}
+      collapse-tags={collapseTags}
       filterMethod={filterMethod || filterOptions}
+      remote={isRemote}
+      remote-method={remoteMethod || filterOptions}
       attrs={$attrs}
       onFocus={onFocus}
-      on={restListeners}
-    >
+      on={restListeners}>
       { getOptionHeader() }
       {
         newOptions.map((item, index) => {
-          const newItem = {
-            key: index,
-            label: item[defaultProps.label],
-            value: item[defaultProps.value],
-            disabled: item[defaultProps.disabled],
-            style: { minWidth: `${minWidth}px` }
+          const itemData = {
+            style: { minWidth: `${optionMinWidth}px`, maxWidth: `${optionMaxWidth}px` },
+            attrs: {
+              label: item.label,
+              value: item.value,
+              disabled: item.disabled,
+              title: showTooltip ? item.label : ''
+            },
+            key: `${item.value}`
           }
           if (showOptionValue) {
-            return <el-option
-              key={newItem.key}
-              label={newItem.label}
-              value={newItem.value}
-              disabled={newItem.disabled}
-              style={newItem.style}>
-              <span style='float: left'>{ newItem.label }</span>
-              <span style='float: right; color: #8492a6; font-size: 13px'>{ newItem.value }</span>
+            return <el-option { ...itemData }>
+              <span style='float: left'>{ item.label }</span>
+              <span style='float: right; color: #8492a6; font-size: 13px'>{ item.value }</span>
             </el-option>
           }
-          return <el-option
-            key={newItem.key}
-            label={newItem.label}
-            value={newItem.value}
-            disabled={newItem.disabled}
-            style={newItem.style}>
-          </el-option>
+          return <el-option { ...itemData } />
         })
       }
       {
@@ -154,7 +213,7 @@ export default {
           </template>
         })
       }
-      { this.$slots.default && this.$slots.default() }
+      { this.$slots.default }
     </el-select>
   }
 }
@@ -164,9 +223,10 @@ export default {
 .el-select-dropdown {
   &.is-multiple {
     .el-select-dropdown__item {
+      padding-right: 20px;
       &.selected {
         &:after {
-          border: 1px solid #fff;
+          display: none;
         }
       }
     }

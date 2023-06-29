@@ -775,6 +775,21 @@
 	text-align: right;
 }
 
+/* 新增is-pagination-center */
+.plTableBox.is-pagination-center .myPagination {
+  text-align: center;
+}
+
+/* 新增is-pagination-background */
+.plTableBox.is-pagination-background .el-pagination .btn-prev:disabled, .plTableBox.is-pagination-background .el-pagination .btn-next:disabled {
+  color: #c0c4cc;
+}
+
+.plTableBox.is-pagination-background .el-pagination .btn-next, .plTableBox.is-pagination-background .el-pagination .btn-prev, .plTableBox.is-pagination-background .el-pagination .el-pager li {
+  background-color: #f4f4f5;
+  color: #333;
+}
+
 .plTableBox .myPagination .el-pagination .btn-prev:disabled, .plTableBox .myPagination .el-pagination .btn-next:disabled {
   color: #ccc;
 }

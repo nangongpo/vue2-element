@@ -39,7 +39,8 @@ import {
   Upload,
   Table,
   TableColumn,
-  Progress
+  Progress,
+  Image
   // Tabs,
   // TabPane,
   // Rate
@@ -86,7 +87,8 @@ const components = [
   Upload,
   Table,
   TableColumn,
-  Progress
+  Progress,
+  Image
   // Tabs,
   // TabPane,
   // Rate

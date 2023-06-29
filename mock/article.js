@@ -4,7 +4,8 @@ const List = []
 const count = 100
 
 const baseContent = '<p>I am testing data, I am testing data.</p><p><img src="https://wpimg.wallstcn.com/4c69009c-0fd4-4153-b112-6cb53d1cf943"></p>'
-const image_uri = 'https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3'
+// const image_uri = 'https://wpimg.wallstcn.com/e4558086-631c-425c-9430-56ffb46e70b3'
+const image_uri = '/asset_management/notice/file/20303bcf-a9d3-4943-9a21-36758e369103&@&市局资金支队采购200部摩托罗拉之六队%20顾志威领取35部.jpg'
 
 for (let i = 0; i < count; i++) {
   List.push(Mock.mock({

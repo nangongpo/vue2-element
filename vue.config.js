@@ -32,13 +32,17 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
-    // proxy: {
-    //   [process.env.VUE_APP_BASE_API]: {
-    //     target: `http://localhost:${port}`, // 外网测试服务
-    //     changeOrigin: true
-    //   }
-    // }
+    before: require('./mock/mock-server.js'),
+    proxy: {
+      // [process.env.VUE_APP_BASE_API]: {
+      //   target: `http://localhost:${port}`, // 外网测试服务
+      //   changeOrigin: true
+      // }
+      '/asset_management': {
+        target: 'http://192.168.0.62:8000',
+        changeOrigin: true
+      }
+    }
   },
   configureWebpack: (config) => {
     const plugins = []
